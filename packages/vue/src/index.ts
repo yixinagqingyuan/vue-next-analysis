@@ -92,8 +92,10 @@ function compileToFunction(
 
   return (compileCache[key] = render)
 }
-
+// 注册当前方法 ，个人理解，之所以这样做是为了将template的获取外置，防止污染内部逻辑，减少代码内部为了兼容处理而产生的涌余
 registerRuntimeCompiler(compileToFunction)
-
+// 导出当前方法
+// todo 注意，在函数开始之前并没有做很多初始化，而是只做了个注册，将编译器赋值给一个变量，为了方便调用到
 export { compileToFunction as compile }
+//导出所有runtime-dom方法
 export * from '@vue/runtime-dom'

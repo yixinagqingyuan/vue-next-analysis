@@ -33,8 +33,8 @@ declare module '@vue/reactivity' {
 
 const rendererOptions = extend({ patchProp }, nodeOps)
 
-// lazy create the renderer - this makes core renderer logic tree-shakable
-// in case the user only imports reactivity utilities from Vue.
+//延迟创建渲染器-这使得核心渲染器逻辑树不稳定
+//如果用户仅从Vue导入反应性实用程序。
 let renderer: Renderer<Element | ShadowRoot> | HydrationRenderer
 
 let enabledHydration = false
@@ -62,8 +62,10 @@ export const render = ((...args) => {
 export const hydrate = ((...args) => {
   ensureHydrationRenderer().hydrate(...args)
 }) as RootHydrateFunction
-
+// runtime-dom 中就包含创建函数
+// 当前创建函数为了能链式调用，会在封装函数在吐出来配置来达到目的，createApp 为创建应用工厂
 export const createApp = ((...args) => {
+  // 接收配置给在在传人下层函数
   const app = ensureRenderer().createApp(...args)
 
   if (__DEV__) {
@@ -150,7 +152,7 @@ function injectCompilerOptionsCheck(app: App) {
       set() {
         warn(
           `The \`isCustomElement\` config option is deprecated. Use ` +
-            `\`compilerOptions.isCustomElement\` instead.`
+          `\`compilerOptions.isCustomElement\` instead.`
         )
       }
     })
@@ -242,12 +244,12 @@ let ssrDirectiveInitialized = false
  */
 export const initDirectivesForSSR = __SSR__
   ? () => {
-      if (!ssrDirectiveInitialized) {
-        ssrDirectiveInitialized = true
-        initVModelForSSR()
-        initVShowForSSR()
-      }
+    if (!ssrDirectiveInitialized) {
+      ssrDirectiveInitialized = true
+      initVModelForSSR()
+      initVShowForSSR()
     }
+  }
   : NOOP
 
 // re-export everything from core
