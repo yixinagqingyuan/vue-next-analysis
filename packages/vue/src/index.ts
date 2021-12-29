@@ -1,22 +1,31 @@
-// This entry is the "full-build" that includes both the runtime
-// and the compiler, and supports on-the-fly compilation of the template option.
+//todo此条目是“完整构建”，包括运行时和和编译器，并支持动态编译模板选项。
 import { initDev } from './dev'
+// 引入 compile内容 CompilerOptions type  CompilerError interface
 import { compile, CompilerOptions, CompilerError } from '@vue/compiler-dom'
+//莫不敢注册函数 RenderFunction type warn警告函数
 import { registerRuntimeCompiler, RenderFunction, warn } from '@vue/runtime-dom'
+// 全量导出runtimeDom
 import * as runtimeDom from '@vue/runtime-dom'
+// 工具函数相关 
 import { isString, NOOP, generateCodeFrame, extend } from '@vue/shared'
 import { InternalRenderFunction } from 'packages/runtime-core/src/component'
-
+// 如果是开发环境，暂时先不考虑
 if (__DEV__) {
   initDev()
 }
-
+// 新建一个空对象，为了缓存已经编译过的模板
 const compileCache: Record<string, RenderFunction> = Object.create(null)
-
+/**
+ *  模板编译方法入口
+ * @param template 
+ * @param options 
+ * @returns 
+ */
 function compileToFunction(
   template: string | HTMLElement,
   options?: CompilerOptions
 ): RenderFunction {
+  // 判断字符情况
   if (!isString(template)) {
     if (template.nodeType) {
       template = template.innerHTML
@@ -78,8 +87,8 @@ function compileToFunction(
     __GLOBAL__ ? new Function(code)() : new Function('Vue', code)(runtimeDom)
   ) as RenderFunction
 
-  // mark the function as runtime compiled
-  ;(render as InternalRenderFunction)._rc = true
+    // mark the function as runtime compiled
+    ; (render as InternalRenderFunction)._rc = true
 
   return (compileCache[key] = render)
 }
