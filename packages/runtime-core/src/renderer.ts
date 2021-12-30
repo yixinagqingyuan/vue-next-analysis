@@ -326,7 +326,7 @@ function baseCreateRenderer(
   createHydrationFns?: typeof createHydrationFunctions
 ): any {
   // compile-time feature flags check
-  // 暂时不考虑
+  // 兼容的内容暂时不看
   if (__ESM_BUNDLER__ && !__TEST__) {
     initFeatureFlags()
   }
@@ -412,6 +412,7 @@ function baseCreateRenderer(
         )
         break
       default:
+        // 如果是个节点类型
         if (shapeFlag & ShapeFlags.ELEMENT) {
           processElement(
             n1,
@@ -424,6 +425,7 @@ function baseCreateRenderer(
             slotScopeIds,
             optimized
           )
+          // 如果是个组件类型
         } else if (shapeFlag & ShapeFlags.COMPONENT) {
           processComponent(
             n1,
@@ -1148,7 +1150,19 @@ function baseCreateRenderer(
       }
     }
   }
-
+  //组件类型的处理
+  /**
+   * 
+   * @param n1 // 旧vnode，在初始化的时候是没有的
+   * @param n2 //新vnode 
+   * @param container // 容器
+   * @param anchor 
+   * @param parentComponent // 父组件实例
+   * @param parentSuspense 
+   * @param isSVG // 是否是svg
+   * @param slotScopeIds 
+   * @param optimized 
+   */
   const processComponent = (
     n1: VNode | null,
     n2: VNode,
@@ -1161,7 +1175,9 @@ function baseCreateRenderer(
     optimized: boolean
   ) => {
     n2.slotScopeIds = slotScopeIds
+    // 如果为空的状态，那么就一定初始化
     if (n1 == null) {
+      // 首先判断是不是keepalive
       if (n2.shapeFlag & ShapeFlags.COMPONENT_KEPT_ALIVE) {
         ; (parentComponent!.ctx as KeepAliveContext).activate(
           n2,

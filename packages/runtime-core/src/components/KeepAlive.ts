@@ -104,7 +104,7 @@ const KeepAliveImpl: ComponentOptions = {
     let current: VNode | null = null
 
     if (__DEV__ || __FEATURE_PROD_DEVTOOLS__) {
-      ;(instance as any).__v_cache = cache
+      ; (instance as any).__v_cache = cache
     }
 
     const parentSuspense = instance.suspense
@@ -307,7 +307,7 @@ const KeepAliveImpl: ComponentOptions = {
           // recursively update transition hooks on subTree
           setTransitionHooks(vnode, vnode.transition!)
         }
-        // avoid vnode being mounted as fresh
+        // 避免将vnode安装为新的
         vnode.shapeFlag |= ShapeFlags.COMPONENT_KEPT_ALIVE
         // make this key the freshest
         keys.delete(key)
@@ -336,7 +336,7 @@ if (__COMPAT__) {
 // also to avoid inline import() in generated d.ts files
 export const KeepAlive = KeepAliveImpl as any as {
   __isKeepAlive: true
-  new (): {
+  new(): {
     $props: VNodeProps & KeepAliveProps
   }
 }
