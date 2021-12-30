@@ -20,7 +20,7 @@ export const patchProp: DOMRendererOptions['patchProp'] = (
   parentComponent,
   parentSuspense,
   unmountChildren
-) => {
+) => { 
   if (key === 'class') {
     patchClass(el, nextValue, isSVG)
   } else if (key === 'style') {

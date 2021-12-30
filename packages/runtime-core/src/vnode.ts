@@ -46,7 +46,7 @@ import { callWithAsyncErrorHandling, ErrorCodes } from './errorHandling'
 
 export const Fragment = Symbol(__DEV__ ? 'Fragment' : undefined) as any as {
   __isFragment: true
-  new (): {
+  new(): {
     $props: VNodeProps
   }
 }
@@ -128,7 +128,7 @@ export interface VNode<
   HostNode = RendererNode,
   HostElement = RendererElement,
   ExtraProps = { [key: string]: any }
-> {
+  > {
   /**
    * @internal
    */
@@ -353,9 +353,9 @@ export function isSameVNodeType(n1: VNode, n2: VNode): boolean {
 
 let vnodeArgsTransformer:
   | ((
-      args: Parameters<typeof _createVNode>,
-      instance: ComponentInternalInstance | null
-    ) => Parameters<typeof _createVNode>)
+    args: Parameters<typeof _createVNode>,
+    instance: ComponentInternalInstance | null
+  ) => Parameters<typeof _createVNode>)
   | undefined
 
 /**
@@ -396,7 +396,18 @@ const normalizeRef = ({
       : null
   ) as any
 }
-
+/**
+ * 将生成的vnode 做一个normalization 增加更多的默认选项
+ * @param type
+ * @param props 
+ * @param children 
+ * @param patchFlag 
+ * @param dynamicProps 
+ * @param shapeFlag 
+ * @param isBlockNode 
+ * @param needFullChildrenNormalization 
+ * @returns 
+ */
 function createBaseVNode(
   type: VNodeTypes | ClassComponent | typeof NULL_DYNAMIC_COMPONENT,
   props: (Data & VNodeProps) | null = null,
@@ -439,7 +450,7 @@ function createBaseVNode(
     normalizeChildren(vnode, children)
     // normalize suspense children
     if (__FEATURE_SUSPENSE__ && shapeFlag & ShapeFlags.SUSPENSE) {
-      ;(type as typeof SuspenseImpl).normalize(vnode)
+      ; (type as typeof SuspenseImpl).normalize(vnode)
     }
   } else if (children) {
     // compiled element vnode - if children is passed, only possible types are
@@ -486,7 +497,16 @@ export { createBaseVNode as createElementVNode }
 export const createVNode = (
   __DEV__ ? createVNodeWithArgsTransform : _createVNode
 ) as typeof _createVNode
-
+/**
+ * 创建vnode 方法
+ * @param type 
+ * @param props 
+ * @param children 
+ * @param patchFlag 
+ * @param dynamicProps 
+ * @param isBlockNode 
+ * @returns 
+ */
 function _createVNode(
   type: VNodeTypes | ClassComponent | typeof NULL_DYNAMIC_COMPONENT,
   props: (Data & VNodeProps) | null = null,
@@ -501,11 +521,12 @@ function _createVNode(
     }
     type = Comment
   }
-
+  // 首先判断是不是一个vnode
   if (isVNode(type)) {
-    // createVNode receiving an existing vnode. This happens in cases like
-    // <component :is="vnode"/>
-    // #2078 make sure to merge refs during the clone instead of overwriting it
+    //createVNode接收现有vnode。这种情况在以下情况下发生
+    //<component:is=“vnode”/
+    //2078确保在克隆过程中合并引用，而不是覆盖引用
+    // 克隆一个就行了
     const cloned = cloneVNode(type, props, true /* mergeRef: true */)
     if (children) {
       normalizeChildren(cloned, children)
@@ -513,7 +534,7 @@ function _createVNode(
     return cloned
   }
 
-  // class component normalization.
+  // 组件的normalization.
   if (isClassComponent(type)) {
     type = type.__vccOpts
   }
@@ -541,26 +562,26 @@ function _createVNode(
     }
   }
 
-  // encode the vnode type information into a bitmap
+  //将vnode类型信息编码为位图
   const shapeFlag = isString(type)
     ? ShapeFlags.ELEMENT
     : __FEATURE_SUSPENSE__ && isSuspense(type)
-    ? ShapeFlags.SUSPENSE
-    : isTeleport(type)
-    ? ShapeFlags.TELEPORT
-    : isObject(type)
-    ? ShapeFlags.STATEFUL_COMPONENT
-    : isFunction(type)
-    ? ShapeFlags.FUNCTIONAL_COMPONENT
-    : 0
+      ? ShapeFlags.SUSPENSE
+      : isTeleport(type)
+        ? ShapeFlags.TELEPORT
+        : isObject(type)
+          ? ShapeFlags.STATEFUL_COMPONENT
+          : isFunction(type)
+            ? ShapeFlags.FUNCTIONAL_COMPONENT
+            : 0
 
   if (__DEV__ && shapeFlag & ShapeFlags.STATEFUL_COMPONENT && isProxy(type)) {
     type = toRaw(type)
     warn(
       `Vue received a Component which was made a reactive object. This can ` +
-        `lead to unnecessary performance overhead, and should be avoided by ` +
-        `marking the component with \`markRaw\` or using \`shallowRef\` ` +
-        `instead of \`ref\`.`,
+      `lead to unnecessary performance overhead, and should be avoided by ` +
+      `marking the component with \`markRaw\` or using \`shallowRef\` ` +
+      `instead of \`ref\`.`,
       `\nComponent that was made reactive: `,
       type
     )
@@ -603,9 +624,9 @@ export function cloneVNode<T, U>(
     ref:
       extraProps && extraProps.ref
         ? // #2078 in the case of <component :is="vnode" ref="extra"/>
-          // if the vnode itself already has a ref, cloneVNode will need to merge
-          // the refs so the single vnode can be set on multiple refs
-          mergeRef && ref
+        // if the vnode itself already has a ref, cloneVNode will need to merge
+        // the refs so the single vnode can be set on multiple refs
+        mergeRef && ref
           ? isArray(ref)
             ? ref.concat(normalizeRef(extraProps)!)
             : [ref, normalizeRef(extraProps)!]
@@ -752,16 +773,16 @@ export function normalizeChildren(vnode: VNode, children: unknown) {
       if (!slotFlag && !(InternalObjectKey in children!)) {
         // if slots are not normalized, attach context instance
         // (compiled / normalized slots already have context)
-        ;(children as RawSlots)._ctx = currentRenderingInstance
+        ; (children as RawSlots)._ctx = currentRenderingInstance
       } else if (slotFlag === SlotFlags.FORWARDED && currentRenderingInstance) {
         // a child component receives forwarded slots from the parent.
         // its slot type is determined by its parent's slot type.
         if (
           (currentRenderingInstance.slots as RawSlots)._ === SlotFlags.STABLE
         ) {
-          ;(children as RawSlots)._ = SlotFlags.STABLE
+          ; (children as RawSlots)._ = SlotFlags.STABLE
         } else {
-          ;(children as RawSlots)._ = SlotFlags.DYNAMIC
+          ; (children as RawSlots)._ = SlotFlags.DYNAMIC
           vnode.patchFlag |= PatchFlags.DYNAMIC_SLOTS
         }
       }

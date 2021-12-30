@@ -173,7 +173,7 @@ export type CreateAppFunction<HostElement> = (
 ) => App<HostElement>
 
 let uid = 0
-
+// 保存全局api
 export function createAppAPI<HostElement>(
   render: RootRenderFunction,
   hydrate?: RootHydrateFunction
@@ -273,12 +273,13 @@ export function createAppAPI<HostElement>(
         context.directives[name] = directive
         return app
       },
-
+      // 这里面去执行渲染器中的render 初始化
       mount(
         rootContainer: HostElement,
         isHydrate?: boolean,
         isSVG?: boolean
       ): any {
+        //判断是不是mounted
         if (!isMounted) {
           const vnode = createVNode(
             rootComponent as ConcreteComponent,

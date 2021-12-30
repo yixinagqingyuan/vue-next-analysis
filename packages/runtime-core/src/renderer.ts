@@ -273,7 +273,7 @@ export const queuePostRenderEffect = __FEATURE_SUSPENSE__
   : queuePostFlushCb
 
 /**
- createRenderer函数接受两个通用参数：
+*createRenderer函数接受两个通用参数：
 *HostNode和HostElement，对应于
 *宿主环境。例如，对于运行时dom，HostNode就是dom
 *`Node`接口和HostElement将是DOM`Element`接口。
@@ -284,9 +284,11 @@ export const queuePostRenderEffect = __FEATURE_SUSPENSE__
 *createApp}，render=createNode，createNode>({
 *patchProp，
 * ...nodeOps
- * })
- * ```
+* })
+* ```
  */
+
+// 创建渲染器
 export function createRenderer<
   HostNode = RendererNode,
   HostElement = RendererElement
@@ -304,12 +306,15 @@ export function createHydrationRenderer(
 }
 
 // overload 1: no hydration
+// 函数的重载兼容多种类型数据的情况
+// 传入一个参数的情况
 function baseCreateRenderer<
   HostNode = RendererNode,
   HostElement = RendererElement
 >(options: RendererOptions<HostNode, HostElement>): Renderer<HostElement>
 
 // overload 2: with hydration
+// 传入两个参数的情况
 function baseCreateRenderer(
   options: RendererOptions<Node, Element>,
   createHydrationFns: typeof createHydrationFunctions
@@ -321,16 +326,17 @@ function baseCreateRenderer(
   createHydrationFns?: typeof createHydrationFunctions
 ): any {
   // compile-time feature flags check
+  // 暂时不考虑
   if (__ESM_BUNDLER__ && !__TEST__) {
     initFeatureFlags()
   }
-
+  // 拿到window
   const target = getGlobalThis()
   target.__VUE__ = true
   if (__DEV__ || __FEATURE_PROD_DEVTOOLS__) {
     setDevtoolsHook(target.__VUE_DEVTOOLS_GLOBAL_HOOK__, target)
   }
-
+  // 取出这些操作dom 方法
   const {
     insert: hostInsert,
     remove: hostRemove,
@@ -347,8 +353,9 @@ function baseCreateRenderer(
     insertStaticContent: hostInsertStaticContent
   } = options
 
-  // Note: functions inside this closure should use `const xxx = () => {}`
-  // style in order to prevent being inlined by minifiers.
+  //注意：此闭包中的函数应该使用`constxxx=（）=>{}`
+  //样式，以防止缩微器内联。
+  //创建 patch 函数，也就是打补丁函数，diff 的核心就在这 初始化创建dom的核心也在这
   const patch: PatchFn = (
     n1,
     n2,
@@ -364,7 +371,7 @@ function baseCreateRenderer(
       return
     }
 
-    // patching & not same type, unmount old tree
+    // 修补类型不同，卸载旧树（&N）
     if (n1 && !isSameVNodeType(n1, n2)) {
       anchor = getNextHostNode(n1)
       unmount(n1, parentComponent, parentSuspense, true)
@@ -2295,7 +2302,7 @@ function baseCreateRenderer(
     }
     return hostNextSibling((vnode.anchor || vnode.el)!)
   }
-
+  // 最主要的部分，render 函数 其中包含了patch 以及 unmount卸载
   const render: RootRenderFunction = (vnode, container, isSVG) => {
     if (vnode == null) {
       if (container._vnode) {

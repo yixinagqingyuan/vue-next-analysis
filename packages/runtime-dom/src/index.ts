@@ -30,17 +30,23 @@ declare module '@vue/reactivity' {
     runtimeDOMBailTypes: Node | Window
   }
 }
-
+// 对宿主对象和内容做了个合并,
+// 也就是crud  的对象，在源码中给抽离处理，叫做宿主方
+//nodeOps 是crud  patchProp 是对Attr的一些特殊处理 
 const rendererOptions = extend({ patchProp }, nodeOps)
 
 //延迟创建渲染器-这使得核心渲染器逻辑树不稳定
 //如果用户仅从Vue导入反应性实用程序。
+// 保存渲染器，在开始的时候就创建后期赋值
 let renderer: Renderer<Element | ShadowRoot> | HydrationRenderer
 
 let enabledHydration = false
-
+/**
+ * 赋值渲染器的函数
+ */
 function ensureRenderer() {
   return (
+    //
     renderer ||
     (renderer = createRenderer<Node, Element | ShadowRoot>(rendererOptions))
   )
