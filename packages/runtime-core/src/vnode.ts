@@ -563,7 +563,8 @@ function _createVNode(
   }
 
   //将vnode类型信息编码为位图
-  // 之所以要判断keepalive类型是由于在初始化生成vnode的时候没有keep模式
+  // 之所以要判断keepalive类型是由于在初始化生成vnode的时候没有keep模式 
+  // 所以在keepalive 执行的时候通过里面的step 去改了shapeFlag,在初始化的时候他就是个普通的组件  
   const shapeFlag = isString(type)
     ? ShapeFlags.ELEMENT
     : __FEATURE_SUSPENSE__ && isSuspense(type)

@@ -319,8 +319,8 @@ const KeepAliveImpl: ComponentOptions = {
           pruneCacheEntry(keys.values().next().value)
         }
       }
-      // avoid vnode being unmounted
-      vnode.shapeFlag |= ShapeFlags.COMPONENT_SHOULD_KEEP_ALIVE
+      // 避免vnode被卸载
+      vnode.shapeFlag |= ShapeFlags.COMPONENT_SHOULD_KEEP_ALIVE  //260
 
       current = vnode
       return rawVNode

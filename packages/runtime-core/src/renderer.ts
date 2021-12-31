@@ -1177,7 +1177,9 @@ function baseCreateRenderer(
     n2.slotScopeIds = slotScopeIds
     // 如果为空的状态，那么就一定初始化
     if (n1 == null) {
-      // 首先判断是不是keepalive
+      // 首先判断是不是keepalive ，因为keepalive 他也是个组件类型， 只不过在后期的的地方他给改了，
+      // 将普通组件和他做了个或运算
+      // 所以在组件更新的时候能够走进来，于是这里必须要判断一下
       if (n2.shapeFlag & ShapeFlags.COMPONENT_KEPT_ALIVE) {
         ; (parentComponent!.ctx as KeepAliveContext).activate(
           n2,
@@ -1187,6 +1189,7 @@ function baseCreateRenderer(
           optimized
         )
       } else {
+        // 这是第一次进来的时候，mountcomponent
         mountComponent(
           n2,
           container,
@@ -1222,7 +1225,7 @@ function baseCreateRenderer(
         parentComponent,
         parentSuspense
       ))
-
+    // div 环境赞不靠路
     if (__DEV__ && instance.type.__hmrId) {
       registerHMR(instance)
     }
@@ -1232,7 +1235,7 @@ function baseCreateRenderer(
       startMeasure(instance, `mount`)
     }
 
-    // inject renderer internals for keepAlive
+    // 为keepAlive注入渲染器内部
     if (isKeepAlive(initialVNode)) {
       ; (instance.ctx as KeepAliveContext).renderer = internals
     }

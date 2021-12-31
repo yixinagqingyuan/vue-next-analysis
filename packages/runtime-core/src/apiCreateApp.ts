@@ -142,9 +142,9 @@ type PluginInstallFunction = (app: App, ...options: any[]) => any
 export type Plugin =
   | (PluginInstallFunction & { install?: PluginInstallFunction })
   | {
-      install: PluginInstallFunction
-    }
-
+    install: PluginInstallFunction
+  }
+// 主要就是创建一些默认变量
 export function createAppContext(): AppContext {
   return {
     app: null as any,
@@ -178,12 +178,13 @@ export function createAppAPI<HostElement>(
   render: RootRenderFunction,
   hydrate?: RootHydrateFunction
 ): CreateAppFunction<HostElement> {
+  //这才是正主createApp
   return function createApp(rootComponent, rootProps = null) {
     if (rootProps != null && !isObject(rootProps)) {
       __DEV__ && warn(`root props passed to app.mount() must be an object.`)
       rootProps = null
     }
-
+    //初始化一个上下文用于保存
     const context = createAppContext()
     const installedPlugins = new Set()
 
@@ -223,7 +224,7 @@ export function createAppAPI<HostElement>(
         } else if (__DEV__) {
           warn(
             `A plugin must either be a function or an object with an "install" ` +
-              `function.`
+            `function.`
           )
         }
         return app
@@ -236,7 +237,7 @@ export function createAppAPI<HostElement>(
           } else if (__DEV__) {
             warn(
               'Mixin has already been applied to target app' +
-                (mixin.name ? `: ${mixin.name}` : '')
+              (mixin.name ? `: ${mixin.name}` : '')
             )
           }
         } else if (__DEV__) {
@@ -303,8 +304,8 @@ export function createAppAPI<HostElement>(
           }
           isMounted = true
           app._container = rootContainer
-          // for devtools and telemetry
-          ;(rootContainer as any).__vue_app__ = app
+            // for devtools and telemetry
+            ; (rootContainer as any).__vue_app__ = app
 
           if (__DEV__ || __FEATURE_PROD_DEVTOOLS__) {
             app._instance = vnode.component
@@ -315,9 +316,9 @@ export function createAppAPI<HostElement>(
         } else if (__DEV__) {
           warn(
             `App has already been mounted.\n` +
-              `If you want to remount the same app, move your app creation logic ` +
-              `into a factory function and create fresh app instances for each ` +
-              `mount - e.g. \`const createMyApp = () => createApp(App)\``
+            `If you want to remount the same app, move your app creation logic ` +
+            `into a factory function and create fresh app instances for each ` +
+            `mount - e.g. \`const createMyApp = () => createApp(App)\``
           )
         }
       },
@@ -339,7 +340,7 @@ export function createAppAPI<HostElement>(
         if (__DEV__ && (key as string | symbol) in context.provides) {
           warn(
             `App already provides property with key "${String(key)}". ` +
-              `It will be overwritten with the new value.`
+            `It will be overwritten with the new value.`
           )
         }
         // TypeScript doesn't allow symbols as index type
