@@ -75,6 +75,7 @@ export class ReactiveEffect<T = any> {
     if (!this.active) {
       return this.fn()
     }
+    // 首先会依赖收集
     if (!effectStack.includes(this)) {
       try {
         effectStack.push((activeEffect = this))
@@ -87,6 +88,7 @@ export class ReactiveEffect<T = any> {
         } else {
           cleanupEffect(this)
         }
+        // 收集完成之后执行一次
         return this.fn()
       } finally {
         if (effectTrackDepth <= maxMarkerBits) {

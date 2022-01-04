@@ -1204,7 +1204,17 @@ function baseCreateRenderer(
       updateComponent(n1, n2, optimized)
     }
   }
-
+  /**
+   * 
+   * @param initialVNode // vnode
+   * @param container // 容器
+   * @param anchor 
+   * @param parentComponent 
+   * @param parentSuspense 
+   * @param isSVG 
+   * @param optimized 
+   * @returns 
+   */
   const mountComponent: MountComponentFn = (
     initialVNode,
     container,
@@ -1214,8 +1224,8 @@ function baseCreateRenderer(
     isSVG,
     optimized
   ) => {
-    // 2.x compat may pre-create the component instance before actually
-    // mounting
+    // 2.x compat可以在实际运行之前预先创建组件实例
+    //安装
     const compatMountInstance =
       __COMPAT__ && initialVNode.isCompatRoot && initialVNode.component
     const instance: ComponentInternalInstance =
@@ -1225,7 +1235,7 @@ function baseCreateRenderer(
         parentComponent,
         parentSuspense
       ))
-    // div 环境赞不靠路
+    // div 环境暂不讨论
     if (__DEV__ && instance.type.__hmrId) {
       registerHMR(instance)
     }
@@ -1235,7 +1245,7 @@ function baseCreateRenderer(
       startMeasure(instance, `mount`)
     }
 
-    // 为keepAlive注入渲染器内部
+    // 为keepAlive注入渲染器内部  
     if (isKeepAlive(initialVNode)) {
       ; (instance.ctx as KeepAliveContext).renderer = internals
     }
@@ -1245,18 +1255,18 @@ function baseCreateRenderer(
       if (__DEV__) {
         startMeasure(instance, `init`)
       }
+      // 执行setup
       setupComponent(instance)
       if (__DEV__) {
         endMeasure(instance, `init`)
       }
     }
 
-    // setup() is async. This component relies on async logic to be resolved
-    // before proceeding
+    //setup（）是异步的。此组件依赖于要解析的异步逻辑
+    //在进行之前
     if (__FEATURE_SUSPENSE__ && instance.asyncDep) {
       parentSuspense && parentSuspense.registerDep(instance, setupRenderEffect)
-
-      // Give it a placeholder if this is not hydration
+      //如果不是，请给它一个占位符
       // TODO handle self-defined fallback
       if (!initialVNode.el) {
         const placeholder = (instance.subTree = createVNode(Comment))
@@ -1264,7 +1274,7 @@ function baseCreateRenderer(
       }
       return
     }
-
+    // 这一块是重要逻辑，依赖收集
     setupRenderEffect(
       instance,
       initialVNode,
@@ -1315,7 +1325,6 @@ function baseCreateRenderer(
       instance.vnode = n2
     }
   }
-
   const setupRenderEffect: SetupRenderEffectFn = (
     instance,
     initialVNode,
@@ -1399,6 +1408,7 @@ function baseCreateRenderer(
           if (__DEV__) {
             startMeasure(instance, `patch`)
           }
+          // 主要执行patch，这是初始化的时候执行的 
           patch(
             null,
             subTree,
@@ -1511,6 +1521,7 @@ function baseCreateRenderer(
         if (__DEV__) {
           startMeasure(instance, `patch`)
         }
+        // 这是更新的时候执行的patch
         patch(
           prevTree,
           nextTree,
@@ -1563,13 +1574,14 @@ function baseCreateRenderer(
       }
     }
 
-    // create reactive effect for rendering
+    // 为渲染创建反应效果
+    // 也就是2版本的watcher 
     const effect = (instance.effect = new ReactiveEffect(
       componentUpdateFn,
       () => queueJob(instance.update),
       instance.scope // track it in component's effect scope
     ))
-
+    //watcher 中的更新函数
     const update = (instance.update = effect.run.bind(effect) as SchedulerJob)
     update.id = instance.uid
     // allowRecurse

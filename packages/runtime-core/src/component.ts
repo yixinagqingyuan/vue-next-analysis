@@ -578,7 +578,7 @@ export function isStatefulComponent(instance: ComponentInternalInstance) {
 }
 
 export let isInSSRComponentSetup = false
-
+// 编译模块
 export function setupComponent(
   instance: ComponentInternalInstance,
   isSSR = false
@@ -587,7 +587,9 @@ export function setupComponent(
 
   const { props, children } = instance.vnode
   const isStateful = isStatefulComponent(instance)
+  // props的初始化
   initProps(instance, props, isStateful, isSSR)
+  // 插槽的初始化
   initSlots(instance, children)
 
   const setupResult = isStateful
@@ -596,7 +598,7 @@ export function setupComponent(
   isInSSRComponentSetup = false
   return setupResult
 }
-
+// 拿到 setup 的执行结果
 function setupStatefulComponent(
   instance: ComponentInternalInstance,
   isSSR: boolean
@@ -637,6 +639,7 @@ function setupStatefulComponent(
   }
   // 2. call setup()
   const { setup } = Component
+  //先执行setup
   if (setup) {
     const setupContext = (instance.setupContext =
       setup.length > 1 ? createSetupContext(instance) : null)
@@ -651,7 +654,7 @@ function setupStatefulComponent(
     )
     resetTracking()
     unsetCurrentInstance()
-
+    // 是不是一个promise
     if (isPromise(setupResult)) {
       setupResult.then(unsetCurrentInstance, unsetCurrentInstance)
 
@@ -708,6 +711,7 @@ export function handleSetupResult(
     if (__DEV__ || __FEATURE_PROD_DEVTOOLS__) {
       instance.devtoolsRawSetupState = setupResult
     }
+    //  给setup改为响应式
     instance.setupState = proxyRefs(setupResult)
     if (__DEV__) {
       exposeSetupStateOnRenderContext(instance)
@@ -718,6 +722,7 @@ export function handleSetupResult(
       }`
     )
   }
+  // 真正的编译
   finishComponentSetup(instance, isSSR)
 }
 
@@ -735,6 +740,7 @@ let installWithProxy: (i: ComponentInternalInstance) => void
  */
 export function registerRuntimeCompiler(_compile: any) {
   //将当前模板编译器赋值方便当前模板内别的函数能调用到
+  //之所以要有这个注册方法，是为了让runtime 中使用
   compile = _compile
   // 暂时不知道什么方法
   installWithProxy = i => {
@@ -747,6 +753,7 @@ export function registerRuntimeCompiler(_compile: any) {
 // dev only
 export const isRuntimeOnly = () => !compile
 
+// 编译相关，
 export function finishComponentSetup(
   instance: ComponentInternalInstance,
   isSSR: boolean,
@@ -762,11 +769,14 @@ export function finishComponentSetup(
     }
   }
 
-  // template / render function normalization
-  // could be already set when returned from setup()
+  // 模板/渲染函数规范化
+  // 从安装程序（）返回时可能已设置
+  //如果没有render
   if (!instance.render) {
     // only do on-the-fly compile if not in SSR - SSR on-the-fly compliation
     // is done by server-renderer
+    //  不是ssr  的情况
+    // runtime 版本是没有compile的
     if (!isSSR && compile && !Component.render) {
       const template =
         (__COMPAT__ &&
@@ -804,7 +814,7 @@ export function finishComponentSetup(
         }
       }
     }
-
+    // 将Component.render 赋值给instance.render
     instance.render = (Component.render || NOOP) as InternalRenderFunction
 
     // for runtime-compiled render functions using `with` blocks, the render

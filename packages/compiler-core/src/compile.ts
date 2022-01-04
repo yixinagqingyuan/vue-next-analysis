@@ -56,8 +56,8 @@ export function getBaseTransformPreset(
   ]
 }
 
-// we name it `baseCompile` so that higher order compilers like
-// @vue/compiler-dom can export `compile` while re-exporting everything else.
+//我们把它命名为“baseCompile”，这样高阶编译器
+//@vue/compiler dom可以在重新导出所有其他内容的同时导出“compile”。
 export function baseCompile(
   template: string | RootNode,
   options: CompilerOptions = {}

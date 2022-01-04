@@ -78,18 +78,21 @@ export const createApp = ((...args) => {
     injectNativeTagCheck(app)
     injectCompilerOptionsCheck(app)
   }
-
+  // 拦截了mount 方法
   const { mount } = app
+  // 重写了一个，逻辑走完之后，直接执行当前挂载方法，为了编译这一块
   app.mount = (containerOrSelector: Element | ShadowRoot | string): any => {
     const container = normalizeContainer(containerOrSelector)
     if (!container) return
 
     const component = app._component
+    // 如果没有render 也没有template
     if (!isFunction(component) && !component.render && !component.template) {
       // __UNSAFE__
       // Reason: potential execution of JS expressions in in-DOM template.
       // The user must make sure the in-DOM template is trusted. If it's
       // rendered by the server, the template should not contain any user data.
+      // 那么就取页面中的innerhtml
       component.template = container.innerHTML
       // 2.x compat check
       if (__COMPAT__ && __DEV__) {
@@ -106,7 +109,7 @@ export const createApp = ((...args) => {
       }
     }
 
-    // clear content before mounting
+    // 安装前清除内容
     container.innerHTML = ''
     const proxy = mount(container, false, container instanceof SVGElement)
     if (container instanceof Element) {
