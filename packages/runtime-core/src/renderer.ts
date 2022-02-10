@@ -337,6 +337,7 @@ function baseCreateRenderer(
     setDevtoolsHook(target.__VUE_DEVTOOLS_GLOBAL_HOOK__, target)
   }
   // 取出这些操作dom 方法
+  // 这些dom操作的方法也可以通过外部传入
   const {
     insert: hostInsert,
     remove: hostRemove,
@@ -385,12 +386,16 @@ function baseCreateRenderer(
 
     const { type, ref, shapeFlag } = n2
     switch (type) {
+      // 文本节点
       case Text:
         processText(n1, n2, container, anchor)
         break
+      // 注释节点
       case Comment:
         processCommentNode(n1, n2, container, anchor)
         break
+      // 静态节点， 这个应该是在ssr的时候用到的
+      // 因为只有在ssr的时候才会常见static类型的vnode
       case Static:
         if (n1 == null) {
           mountStaticNode(n2, container, anchor, isSVG)
@@ -398,6 +403,7 @@ function baseCreateRenderer(
           patchStaticNode(n1, n2, container, isSVG)
         }
         break
+      // Fragment 片段
       case Fragment:
         processFragment(
           n1,
@@ -412,6 +418,7 @@ function baseCreateRenderer(
         )
         break
       default:
+        // 去除了特殊情况节点的渲染，就是正常的vnode 渲染
         // 如果是个节点类型
         if (shapeFlag & ShapeFlags.ELEMENT) {
           processElement(
@@ -438,6 +445,7 @@ function baseCreateRenderer(
             slotScopeIds,
             optimized
           )
+          // 如果是个传送门
         } else if (shapeFlag & ShapeFlags.TELEPORT) {
           ; (type as typeof TeleportImpl).process(
             n1 as TeleportVNode,
@@ -451,6 +459,7 @@ function baseCreateRenderer(
             optimized,
             internals
           )
+          // Suspense  实验性内容
         } else if (__FEATURE_SUSPENSE__ && shapeFlag & ShapeFlags.SUSPENSE) {
           ; (type as typeof SuspenseImpl).process(
             n1,
@@ -474,7 +483,7 @@ function baseCreateRenderer(
       setRef(ref, n1 && n1.ref, parentSuspense, n2 || n1, !n2)
     }
   }
-
+  // 文本内容的处理
   const processText: ProcessTextOrCommentFn = (n1, n2, container, anchor) => {
     if (n1 == null) {
       hostInsert(
@@ -489,7 +498,7 @@ function baseCreateRenderer(
       }
     }
   }
-
+  // 注释节点处理
   const processCommentNode: ProcessTextOrCommentFn = (
     n1,
     n2,
@@ -507,15 +516,15 @@ function baseCreateRenderer(
       n2.el = n1.el
     }
   }
-
+  // 静态节点是由于在编译的时候节点被分为静态和动态，如此依赖为了减少不不要的渲染来使用静态字符串的方式解决
   const mountStaticNode = (
     n2: VNode,
     container: RendererElement,
     anchor: RendererNode | null,
     isSVG: boolean
   ) => {
-    // static nodes are only present when used with compiler-dom/runtime-dom
-    // which guarantees presence of hostInsertStaticContent.
+    //静态节点仅在与编译器dom/运行时dom一起使用时才存在
+    //这保证了hostInsertStaticContent的存在。
     ;[n2.el, n2.anchor] = hostInsertStaticContent!(
       n2.children as string,
       container,
@@ -527,6 +536,7 @@ function baseCreateRenderer(
   /**
    * Dev / HMR only
    */
+  // 静态节点的的patch的处理，暂时不知道干啥的
   const patchStaticNode = (
     n1: VNode,
     n2: VNode,
@@ -574,7 +584,7 @@ function baseCreateRenderer(
     }
     hostRemove(anchor!)
   }
-
+  // 节点类型的处理
   const processElement = (
     n1: VNode | null,
     n2: VNode,
@@ -588,6 +598,7 @@ function baseCreateRenderer(
   ) => {
     isSVG = isSVG || (n2.type as string) === 'svg'
     if (n1 == null) {
+      // 如果第一次没有，那么就是走mountelement的类型
       mountElement(
         n2,
         container,
@@ -599,6 +610,7 @@ function baseCreateRenderer(
         optimized
       )
     } else {
+      // 第二次的时候在做patch 这块包含diff
       patchElement(
         n1,
         n2,
@@ -610,7 +622,7 @@ function baseCreateRenderer(
       )
     }
   }
-
+  // 节点初始化
   const mountElement = (
     vnode: VNode,
     container: RendererElement,
@@ -634,6 +646,10 @@ function baseCreateRenderer(
       // Only static vnodes can be reused, so its mounted DOM nodes should be
       // exactly the same, and we can simply do a clone here.
       // only do this in production since cloned trees cannot be HMR updated.
+      //如果一个vnode具有非空el，则表示它正在被重用。
+      //只有静态VNode可以重用，因此应该删除其装载的DOM节点
+      //完全一样，我们可以在这里做一个克隆。
+      //因为克隆树不能被HMR更新，所以只能在生产中这样做。
       el = vnode.el = hostCloneNode(vnode.el)
     } else {
       el = vnode.el = hostCreateElement(
@@ -956,7 +972,7 @@ function baseCreateRenderer(
     }
   }
 
-  // The fast path for blocks.
+  //块的快速路径。
   const patchBlockChildren: PatchBlockChildrenFn = (
     oldChildren,
     newChildren,
@@ -2416,7 +2432,7 @@ export function traverseStaticChildren(n1: VNode, n2: VNode, shallow = false) {
     }
   }
 }
-
+// 最长递归子序列
 // https://en.wikipedia.org/wiki/Longest_increasing_subsequence
 function getSequence(arr: number[]): number[] {
   const p = arr.slice()

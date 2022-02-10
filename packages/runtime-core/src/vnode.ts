@@ -515,10 +515,12 @@ function _createVNode(
   dynamicProps: string[] | null = null,
   isBlockNode = false
 ): VNode {
+  // 为了判断兼容特殊情况
   if (!type || type === NULL_DYNAMIC_COMPONENT) {
     if (__DEV__ && !type) {
       warn(`Invalid vnode type when creating vnode: ${type}.`)
     }
+    // 如果满足这些特殊情况统一赋值为组件类型
     type = Comment
   }
   // 首先判断是不是一个vnode
@@ -539,7 +541,7 @@ function _createVNode(
     type = type.__vccOpts
   }
 
-  // 2.x async/functional component compat
+  // 2.x异步/功能组件兼容
   if (__COMPAT__) {
     type = convertLegacyComponent(type, currentRenderingInstance)
   }
@@ -565,6 +567,8 @@ function _createVNode(
   //将vnode类型信息编码为位图
   // 之所以要判断keepalive类型是由于在初始化生成vnode的时候没有keep模式 
   // 所以在keepalive 执行的时候通过里面的step 去改了shapeFlag,在初始化的时候他就是个普通的组件  
+  // 由于创建类型的时候这些类似于注释节点的type 并没有做相对的处理，所以必须在开始后的时候指出
+  // 不能走在default中判断容易混淆
   const shapeFlag = isString(type)
     ? ShapeFlags.ELEMENT
     : __FEATURE_SUSPENSE__ && isSuspense(type)
@@ -699,6 +703,7 @@ export function createTextVNode(text: string = ' ', flag: number = 0): VNode {
 /**
  * @private
  */
+// 当前方法一般是在ssr 的情况下使用的
 export function createStaticVNode(
   content: string,
   numberOfNodes: number

@@ -275,6 +275,13 @@ export function createAppAPI<HostElement>(
         return app
       },
       // 这里面去执行渲染器中的render 初始化
+      /**
+       * 
+       * @param rootContainer // 容器
+       * @param isHydrate 
+       * @param isSVG  
+       * @returns 
+       */
       mount(
         rootContainer: HostElement,
         isHydrate?: boolean,
@@ -296,10 +303,11 @@ export function createAppAPI<HostElement>(
               render(cloneVNode(vnode), rootContainer, isSVG)
             }
           }
-
+          //服务端渲染使用
           if (isHydrate && hydrate) {
             hydrate(vnode as VNode<Node, Element>, rootContainer as any)
           } else {
+            // 执行render 开始初始化dom
             render(vnode, rootContainer, isSVG)
           }
           isMounted = true

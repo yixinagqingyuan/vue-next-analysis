@@ -46,7 +46,8 @@ let enabledHydration = false
  */
 function ensureRenderer() {
   return (
-    //
+    //返回当前渲染器,如果没有渲染器那就重写一个
+    // 这个地方就是为了让你自定义渲染器 如果你不自定义那么就默认给一个web平台独有的渲染器
     renderer ||
     (renderer = createRenderer<Node, Element | ShadowRoot>(rendererOptions))
   )
@@ -80,11 +81,11 @@ export const createApp = ((...args) => {
   }
   // 拦截了mount 方法
   const { mount } = app
-  // 重写了一个，逻辑走完之后，直接执行当前挂载方法，为了编译这一块
+  // 重写了一个，逻辑走完之后，直接执行当前挂载方法，为了编译这一块,相当于做个模板的normalize
   app.mount = (containerOrSelector: Element | ShadowRoot | string): any => {
     const container = normalizeContainer(containerOrSelector)
     if (!container) return
-
+    // 根组件对象
     const component = app._component
     // 如果没有render 也没有template
     if (!isFunction(component) && !component.render && !component.template) {
@@ -111,6 +112,7 @@ export const createApp = ((...args) => {
 
     // 安装前清除内容
     container.innerHTML = ''
+    
     const proxy = mount(container, false, container instanceof SVGElement)
     if (container instanceof Element) {
       container.removeAttribute('v-cloak')

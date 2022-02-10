@@ -13,10 +13,11 @@ import { shallowRef, unref, customRef, triggerRef } from '../src/ref'
 
 describe('reactivity/ref', () => {
   it('should hold a value', () => {
-    const a = ref(1)
+    const a = ref(null)
+    console.log(a)
     expect(a.value).toBe(1)
-    a.value = 2
-    expect(a.value).toBe(2)
+    // a.value = 2
+    // expect(a.value).toBe(2)
   })
 
   it('should be reactive', () => {

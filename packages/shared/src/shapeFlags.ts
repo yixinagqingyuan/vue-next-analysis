@@ -7,14 +7,14 @@
 
 
 export const enum ShapeFlags {
-  ELEMENT = 1,
-  FUNCTIONAL_COMPONENT = 1 << 1,//2
-  STATEFUL_COMPONENT = 1 << 2,//4
+  ELEMENT = 1, // 普通节点
+  FUNCTIONAL_COMPONENT = 1 << 1,//2 // 函数组件
+  STATEFUL_COMPONENT = 1 << 2,//4 // 普通组件
   TEXT_CHILDREN = 1 << 3,//8
   ARRAY_CHILDREN = 1 << 4,//16
   SLOTS_CHILDREN = 1 << 5,//32
-  TELEPORT = 1 << 6,//64
-  SUSPENSE = 1 << 7,//128
+  TELEPORT = 1 << 6,//64 // 传送门
+  SUSPENSE = 1 << 7,//128 // 可以在组件中异步
   COMPONENT_SHOULD_KEEP_ALIVE = 1 << 8,//256
   COMPONENT_KEPT_ALIVE = 1 << 9,//512
   COMPONENT = ShapeFlags.STATEFUL_COMPONENT | ShapeFlags.FUNCTIONAL_COMPONENT // 6 表示函数组件和普通组件
