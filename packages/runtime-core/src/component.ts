@@ -441,18 +441,22 @@ export interface ComponentInternalInstance {
    */
   [LifecycleHooks.SERVER_PREFETCH]: LifecycleHook<() => Promise<unknown>>
 }
-
+// 创建一个新的上下文
 const emptyAppContext = createAppContext()
 
 let uid = 0
-
+// 创建组件实例
 export function createComponentInstance(
   vnode: VNode,
   parent: ComponentInternalInstance | null,
   suspense: SuspenseBoundary | null
 ) {
+  // 拿到类型
   const type = vnode.type as ConcreteComponent
   // inherit parent app context - or - if root, adopt from root vnode
+  //继承父应用程序上下文-或者-如果是root，则从root vnode采用
+  // 这里就需要从他的父级继承
+  // 如果他爹没有那么就床架哪一个
   const appContext =
     (parent ? parent.appContext : vnode.appContext) || emptyAppContext
 
@@ -572,13 +576,13 @@ export function validateComponentName(name: string, config: AppConfig) {
     )
   }
 }
-
+// 再次验证是不是一个普通组件
 export function isStatefulComponent(instance: ComponentInternalInstance) {
   return instance.vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT
 }
 
 export let isInSSRComponentSetup = false
-// 编译模块
+// 初始化组件，包含组件的编译
 export function setupComponent(
   instance: ComponentInternalInstance,
   isSSR = false
@@ -591,7 +595,7 @@ export function setupComponent(
   initProps(instance, props, isStateful, isSSR)
   // 插槽的初始化
   initSlots(instance, children)
-
+  // 如果是个有状态组就执行初始化逻辑
   const setupResult = isStateful
     ? setupStatefulComponent(instance, isSSR)
     : undefined
@@ -603,8 +607,9 @@ function setupStatefulComponent(
   instance: ComponentInternalInstance,
   isSSR: boolean
 ) {
+  // 拿到当前组件的配置,在组件初始化之前的逻辑中，将配置放在了type中
   const Component = instance.type as ComponentOptions
-
+  // dev 我们暂不考虑
   if (__DEV__) {
     if (Component.name) {
       validateComponentName(Component.name, instance.appContext.config)
@@ -630,10 +635,16 @@ function setupStatefulComponent(
     }
   }
   // 0. create render proxy property access cache
+  //创建渲染代理属性访问缓存
   instance.accessCache = Object.create(null)
   // 1. create public instance / render proxy
   // also mark it raw so it's never observed
+  // 1. 创建公共实例/渲染代理
+  //也要把它标记为生的，这样就不会被观察到
+  //个人理解为了让instance.ctx也具有响应式
+  // 但是具有响应式之后有啥用还没研究明白
   instance.proxy = markRaw(new Proxy(instance.ctx, PublicInstanceProxyHandlers))
+  // 暂不研究
   if (__DEV__) {
     exposePropsOnRenderContext(instance)
   }

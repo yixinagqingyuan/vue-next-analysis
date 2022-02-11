@@ -145,6 +145,7 @@ export type Plugin =
     install: PluginInstallFunction
   }
 // 主要就是创建一些默认变量
+// 也就是上下文
 export function createAppContext(): AppContext {
   return {
     app: null as any,
@@ -178,7 +179,11 @@ export function createAppAPI<HostElement>(
   render: RootRenderFunction,
   hydrate?: RootHydrateFunction
 ): CreateAppFunction<HostElement> {
-  //这才是正主createApp
+  //这才是正主createApp 
+  /**
+   * rootComponent 表示传入的配置
+   * 
+   */
   return function createApp(rootComponent, rootProps = null) {
     if (rootProps != null && !isObject(rootProps)) {
       __DEV__ && warn(`root props passed to app.mount() must be an object.`)
@@ -289,6 +294,9 @@ export function createAppAPI<HostElement>(
       ): any {
         //判断是不是mounted
         if (!isMounted) {
+          // 如果不是mounted的状态那么就需要将根节点创建一个vnode
+          // 当根节点创建的时候直接将配置传入由于配置是的对象所以在分配类型的时候
+          // 就会分配为组件类型
           const vnode = createVNode(
             rootComponent as ConcreteComponent,
             rootProps

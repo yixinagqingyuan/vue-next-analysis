@@ -18,7 +18,7 @@ export const EMPTY_OBJ: { readonly [key: string]: any } = __DEV__
   : {}
 export const EMPTY_ARR = __DEV__ ? Object.freeze([]) : []
 
-export const NOOP = () => {}
+export const NOOP = () => { }
 
 /**
  * Always return false.
@@ -84,9 +84,9 @@ export const isIntegerKey = (key: unknown) =>
 export const isReservedProp = /*#__PURE__*/ makeMap(
   // the leading comma is intentional so empty string "" is also included
   ',key,ref,ref_for,ref_key,' +
-    'onVnodeBeforeMount,onVnodeMounted,' +
-    'onVnodeBeforeUpdate,onVnodeUpdated,' +
-    'onVnodeBeforeUnmount,onVnodeUnmounted'
+  'onVnodeBeforeMount,onVnodeMounted,' +
+  'onVnodeBeforeUpdate,onVnodeUpdated,' +
+  'onVnodeBeforeUnmount,onVnodeUnmounted'
 )
 
 const cacheStringFunction = <T extends (str: string) => string>(fn: T): T => {
@@ -96,11 +96,12 @@ const cacheStringFunction = <T extends (str: string) => string>(fn: T): T => {
     return hit || (cache[str] = fn(str))
   }) as any
 }
-
+// 匹配-后面的第一个字母
 const camelizeRE = /-(\w)/g
 /**
  * @private
  */
+//这个其实就是转为大写来更精确的找到组件，防止写法不一致导致找不到组件报错
 export const camelize = cacheStringFunction((str: string): string => {
   return str.replace(camelizeRE, (_, c) => (c ? c.toUpperCase() : ''))
 })
@@ -116,6 +117,7 @@ export const hyphenate = cacheStringFunction((str: string) =>
 /**
  * @private
  */
+// 这是给首字母也给转为大写在找组件，直到所有的都找到
 export const capitalize = cacheStringFunction(
   (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 )
@@ -158,11 +160,11 @@ export const getGlobalThis = (): any => {
       typeof globalThis !== 'undefined'
         ? globalThis
         : typeof self !== 'undefined'
-        ? self
-        : typeof window !== 'undefined'
-        ? window
-        : typeof global !== 'undefined'
-        ? global
-        : {})
+          ? self
+          : typeof window !== 'undefined'
+            ? window
+            : typeof global !== 'undefined'
+              ? global
+              : {})
   )
 }

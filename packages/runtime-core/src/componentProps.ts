@@ -151,7 +151,7 @@ export type NormalizedPropsOptions = [NormalizedProps, string[]] | []
 export function initProps(
   instance: ComponentInternalInstance,
   rawProps: Data | null,
-  isStateful: number, // result of bitwise flag comparison
+  isStateful: number, // result of bitwise flag comparison 按位标志比较的结果
   isSSR = false
 ) {
   const props: Data = {}

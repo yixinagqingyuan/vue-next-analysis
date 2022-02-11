@@ -20,6 +20,7 @@
                             <div>one</div>
                             <div>two</div>three
                             <div v-html="`<div>asdfasfasdfasdfasdf<div>`"></div>
+                            <my-component-name></my-component-name>
                           </div>
                         </div>
                       </div>
@@ -45,7 +46,7 @@
   }
 
   const formatDate = v => v.replace(/T|Z/g, ' ')
-  createApp({
+  const app = createApp({
     setup() {
       const currentBranch = ref('master')
       const commits = ref(null)
@@ -67,7 +68,12 @@
         formatDate
       }
     }
-  }).mount('#demo')
+  })
+  app.component('my-component-name', {
+    template: '<div>好好学习<div>'
+  })
+  app.mount('#demo')
+
 </script>
 
 <style>

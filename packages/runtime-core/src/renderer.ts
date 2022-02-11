@@ -299,6 +299,7 @@ export function createRenderer<
 // Separate API for creating hydration-enabled renderer.
 // Hydration logic is only used when calling this function, making it
 // tree-shakable.
+
 export function createHydrationRenderer(
   options: RendererOptions<Node, Element>
 ) {
@@ -433,6 +434,10 @@ function baseCreateRenderer(
             optimized
           )
           // 如果是个组件类型
+          // 第一次执行挂载时候也被当做组件类型初始化的
+          // vue3改版之后直接用配置去常见对象去创建组件vnode
+          // 这个配置需要用一个函数去拿，也是动态加载的
+          // 传入名字在运行时去去通过resolvecompinent 来拿
         } else if (shapeFlag & ShapeFlags.COMPONENT) {
           processComponent(
             n1,
@@ -1225,7 +1230,7 @@ function baseCreateRenderer(
    * @param initialVNode // vnode
    * @param container // 容器
    * @param anchor 
-   * @param parentComponent 
+   * @param parentComponent // 父组件
    * @param parentSuspense 
    * @param isSVG 
    * @param optimized 
@@ -1242,8 +1247,10 @@ function baseCreateRenderer(
   ) => {
     // 2.x compat可以在实际运行之前预先创建组件实例
     //安装
+    //如果有组件实例那么就取当前组件实例
     const compatMountInstance =
       __COMPAT__ && initialVNode.isCompatRoot && initialVNode.component
+    // 保存一下组件的实例 如果找不到就创建一个
     const instance: ComponentInternalInstance =
       compatMountInstance ||
       (initialVNode.component = createComponentInstance(
@@ -1267,6 +1274,8 @@ function baseCreateRenderer(
     }
 
     // resolve props and slots for setup context
+    // 为安装环境解析道具和插槽
+    // dev 暂时不讨论
     if (!(__COMPAT__ && compatMountInstance)) {
       if (__DEV__) {
         startMeasure(instance, `init`)
@@ -1284,6 +1293,7 @@ function baseCreateRenderer(
       parentSuspense && parentSuspense.registerDep(instance, setupRenderEffect)
       //如果不是，请给它一个占位符
       // TODO handle self-defined fallback
+      //理自定义的回退
       if (!initialVNode.el) {
         const placeholder = (instance.subTree = createVNode(Comment))
         processCommentNode(null, placeholder, container!, anchor)
@@ -2386,6 +2396,7 @@ function baseCreateRenderer(
   return {
     render,
     hydrate,
+    // 这里就是createApp 的地方
     createApp: createAppAPI(render, hydrate)
   }
 }

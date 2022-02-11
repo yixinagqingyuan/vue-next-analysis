@@ -72,7 +72,7 @@ export const hydrate = ((...args) => {
 // runtime-dom 中就包含创建函数
 // 当前创建函数为了能链式调用，会在封装函数在吐出来配置来达到目的，createApp 为创建应用工厂
 export const createApp = ((...args) => {
-  // 接收配置给在在传人下层函数
+  // 接收配置给在在传人下层函数 这里的args其实就是创建的时候传入的配置
   const app = ensureRenderer().createApp(...args)
 
   if (__DEV__) {
@@ -112,7 +112,7 @@ export const createApp = ((...args) => {
 
     // 安装前清除内容
     container.innerHTML = ''
-    
+
     const proxy = mount(container, false, container instanceof SVGElement)
     if (container instanceof Element) {
       container.removeAttribute('v-cloak')

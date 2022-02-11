@@ -100,8 +100,13 @@ function resolveAsset(
     const res =
       // local registration
       // check instance[type] first which is resolved for options API
+      //本地注册
+      //首先检查为选项API解析的实例[type]
+      //这是先从实例去找如果找不到
       resolve(instance[type] || (Component as ComponentOptions)[type], name) ||
       // global registration
+      //全球注册 
+      // 那么就去全局去找
       resolve(instance.appContext[type], name)
 
     if (!res && maybeSelfReference) {
@@ -113,7 +118,7 @@ function resolveAsset(
       const extra =
         type === COMPONENTS
           ? `\nIf this is a native custom element, make sure to exclude it from ` +
-            `component resolution via compilerOptions.isCustomElement.`
+          `component resolution via compilerOptions.isCustomElement.`
           : ``
       warn(`Failed to resolve ${type.slice(0, -1)}: ${name}${extra}`)
     }
@@ -122,7 +127,7 @@ function resolveAsset(
   } else if (__DEV__) {
     warn(
       `resolve${capitalize(type.slice(0, -1))} ` +
-        `can only be used in render() or setup().`
+      `can only be used in render() or setup().`
     )
   }
 }
