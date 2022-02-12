@@ -39,7 +39,7 @@ export class EffectScope {
       warn(`cannot run an inactive effect scope.`)
     }
   }
-
+// 开始依收集了，将当前实例压栈,这样能有顺序的处理active实例
   on() {
     if (this.active) {
       effectScopeStack.push(this)

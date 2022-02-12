@@ -652,6 +652,8 @@ function setupStatefulComponent(
   const { setup } = Component
   //先执行setup
   if (setup) {
+    // 创建setup 的上下文 并且给他存入 instance实例中
+    // 主要就是props emit 什么的
     const setupContext = (instance.setupContext =
       setup.length > 1 ? createSetupContext(instance) : null)
 
@@ -909,6 +911,8 @@ export function createSetupContext(
   if (__DEV__) {
     // We use getters in dev in case libs like test-utils overwrite instance
     // properties (overwrites should not be done in prod)
+    //我们在dev中使用getter，以防像test-utils这样的lib覆盖实例
+    //属性（不应在prod中进行覆盖）
     return Object.freeze({
       get attrs() {
         return attrs || (attrs = createAttrsProxy(instance))

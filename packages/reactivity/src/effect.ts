@@ -171,7 +171,6 @@ export function stop(runner: ReactiveEffectRunner) {
 
 let shouldTrack = true
 const trackStack: boolean[] = []
-
 export function pauseTracking() {
   trackStack.push(shouldTrack)
   shouldTrack = false

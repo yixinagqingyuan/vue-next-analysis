@@ -1275,8 +1275,9 @@ function baseCreateRenderer(
 
     // resolve props and slots for setup context
     // 为安装环境解析道具和插槽
-    // dev 暂时不讨论
+
     if (!(__COMPAT__ && compatMountInstance)) {
+      // dev 暂时不讨论
       if (__DEV__) {
         startMeasure(instance, `init`)
       }
@@ -1427,6 +1428,7 @@ function baseCreateRenderer(
           if (__DEV__) {
             startMeasure(instance, `render`)
           }
+          // 生成vnode
           const subTree = (instance.subTree = renderComponentRoot(instance))
           if (__DEV__) {
             endMeasure(instance, `render`)
@@ -1435,6 +1437,7 @@ function baseCreateRenderer(
             startMeasure(instance, `patch`)
           }
           // 主要执行patch，这是初始化的时候执行的 
+          // 第一次执行，依赖收集开始了
           patch(
             null,
             subTree,
