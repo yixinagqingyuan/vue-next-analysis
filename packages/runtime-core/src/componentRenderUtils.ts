@@ -37,10 +37,11 @@ let accessedAttrs: boolean = false
 export function markAttrsAccessed() {
   accessedAttrs = true
 }
-
+// 生成vonde 的地方
 export function renderComponentRoot(
   instance: ComponentInternalInstance
 ): VNode {
+  // 取出实例中的相关内容
   const {
     type: Component,
     vnode,
@@ -61,6 +62,7 @@ export function renderComponentRoot(
 
   let result
   let fallthroughAttrs
+  // 两个功能保存当前instance，返回上一个 instance
   const prev = setCurrentRenderingInstance(instance)
   if (__DEV__) {
     accessedAttrs = false
@@ -71,6 +73,7 @@ export function renderComponentRoot(
       // withProxy is a proxy with a different `has` trap only for
       // runtime-compiled render functions using `with` block.
       const proxyToUse = withProxy || proxy
+      // 这个reslut 就是vnode 
       result = normalizeVNode(
         render!.call(
           proxyToUse,
@@ -93,18 +96,18 @@ export function renderComponentRoot(
       result = normalizeVNode(
         render.length > 1
           ? render(
-              props,
-              __DEV__
-                ? {
-                    get attrs() {
-                      markAttrsAccessed()
-                      return attrs
-                    },
-                    slots,
-                    emit
-                  }
-                : { attrs, slots, emit }
-            )
+            props,
+            __DEV__
+              ? {
+                get attrs() {
+                  markAttrsAccessed()
+                  return attrs
+                },
+                slots,
+                emit
+              }
+              : { attrs, slots, emit }
+          )
           : render(props, null as any /* we know it doesn't need it */)
       )
       fallthroughAttrs = Component.props
@@ -112,6 +115,7 @@ export function renderComponentRoot(
         : getFunctionalFallthrough(attrs)
     }
   } catch (err) {
+    // 报错的情况下的兼容处理
     blockStack.length = 0
     handleError(err, instance, ErrorCodes.RENDER_FUNCTION)
     result = createVNode(Comment)
@@ -120,6 +124,9 @@ export function renderComponentRoot(
   // attr merging
   // in dev mode, comments are preserved, and it's possible for a template
   // to have comments along side the root element which makes it a fragment
+  //attr合并
+  //在开发模式下，注释会被保留，并且可以使用模板
+  //在根元素旁边添加注释，使其成为一个片段
   let root = result
   let setRoot: ((root: VNode) => void) | undefined = undefined
   if (
@@ -166,19 +173,19 @@ export function renderComponentRoot(
         if (extraAttrs.length) {
           warn(
             `Extraneous non-props attributes (` +
-              `${extraAttrs.join(', ')}) ` +
-              `were passed to component but could not be automatically inherited ` +
-              `because component renders fragment or text root nodes.`
+            `${extraAttrs.join(', ')}) ` +
+            `were passed to component but could not be automatically inherited ` +
+            `because component renders fragment or text root nodes.`
           )
         }
         if (eventAttrs.length) {
           warn(
             `Extraneous non-emits event listeners (` +
-              `${eventAttrs.join(', ')}) ` +
-              `were passed to component but could not be automatically inherited ` +
-              `because component renders fragment or text root nodes. ` +
-              `If the listener is intended to be a component custom event listener only, ` +
-              `declare it using the "emits" option.`
+            `${eventAttrs.join(', ')}) ` +
+            `were passed to component but could not be automatically inherited ` +
+            `because component renders fragment or text root nodes. ` +
+            `If the listener is intended to be a component custom event listener only, ` +
+            `declare it using the "emits" option.`
           )
         }
       }
@@ -212,7 +219,7 @@ export function renderComponentRoot(
     if (__DEV__ && !isElementRoot(root)) {
       warn(
         `Runtime directive used on component with non-element root node. ` +
-          `The directives will not function as intended.`
+        `The directives will not function as intended.`
       )
     }
     root.dirs = root.dirs ? root.dirs.concat(vnode.dirs) : vnode.dirs
@@ -222,7 +229,7 @@ export function renderComponentRoot(
     if (__DEV__ && !isElementRoot(root)) {
       warn(
         `Component inside <Transition> renders non-element root node ` +
-          `that cannot be animated.`
+        `that cannot be animated.`
       )
     }
     root.transition = vnode.transition
@@ -295,7 +302,7 @@ const getFunctionalFallthrough = (attrs: Data): Data | undefined => {
   let res: Data | undefined
   for (const key in attrs) {
     if (key === 'class' || key === 'style' || isOn(key)) {
-      ;(res || (res = {}))[key] = attrs[key]
+      ; (res || (res = {}))[key] = attrs[key]
     }
   }
   return res
@@ -412,7 +419,7 @@ export function updateHOCHostEl(
   el: typeof vnode.el // HostNode
 ) {
   while (parent && parent.subTree === vnode) {
-    ;(vnode = parent.vnode).el = el
+    ; (vnode = parent.vnode).el = el
     parent = parent.parent
   }
 }

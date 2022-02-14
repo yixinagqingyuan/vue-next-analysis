@@ -1282,6 +1282,7 @@ function baseCreateRenderer(
         startMeasure(instance, `init`)
       }
       // 执行setup
+      // 所以当setup 执行的时候dom 还没生成
       setupComponent(instance)
       if (__DEV__) {
         endMeasure(instance, `init`)
@@ -1361,6 +1362,7 @@ function baseCreateRenderer(
     isSVG,
     optimized
   ) => {
+    // 加个包装函数
     const componentUpdateFn = () => {
       if (!instance.isMounted) {
         let vnodeHook: VNodeHook | null | undefined
@@ -1394,6 +1396,7 @@ function baseCreateRenderer(
             if (__DEV__) {
               startMeasure(instance, `render`)
             }
+            // 当前方法执行完成，依赖收集就结束了
             instance.subTree = renderComponentRoot(instance)
             if (__DEV__) {
               endMeasure(instance, `render`)
@@ -1428,7 +1431,8 @@ function baseCreateRenderer(
           if (__DEV__) {
             startMeasure(instance, `render`)
           }
-          // 生成vnode
+          // 生成vnode 也就是执行rendere 的地方，同样的里面也用try catch包着，防止报错
+          // 执行render 的时候开始依赖收集
           const subTree = (instance.subTree = renderComponentRoot(instance))
           if (__DEV__) {
             endMeasure(instance, `render`)

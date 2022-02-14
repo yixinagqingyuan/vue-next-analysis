@@ -656,9 +656,14 @@ function setupStatefulComponent(
     // 主要就是props emit 什么的
     const setupContext = (instance.setupContext =
       setup.length > 1 ? createSetupContext(instance) : null)
-
+    // 封装一下将当前活动的实例压栈,这是为了后续能拿到当前执行的组件实例
+    // 将当前实例存入到了数组中
     setCurrentInstance(instance)
+    //  暂时没研究明白干嘛 
     pauseTracking()
+    // 拿到执行结果
+    // callWithErrorHandling 方法是为了兼容处理,加入try catch 防止报错
+    // steup 中的props等内容就是从这里传入去的
     const setupResult = callWithErrorHandling(
       setup,
       instance,
@@ -703,6 +708,7 @@ export function handleSetupResult(
   setupResult: unknown,
   isSSR: boolean
 ) {
+  // 如果结果是个函数就表示他返回的是个组件，也就是个render 函数
   if (isFunction(setupResult)) {
     // setup returned an inline render function
     if (__SSR__ && (instance.type as ComponentOptions).__ssrInlineRender) {
@@ -712,6 +718,7 @@ export function handleSetupResult(
     } else {
       instance.render = setupResult as InternalRenderFunction
     }
+    // retrun 响应式对象的地方
   } else if (isObject(setupResult)) {
     if (__DEV__ && isVNode(setupResult)) {
       warn(
@@ -725,6 +732,7 @@ export function handleSetupResult(
       instance.devtoolsRawSetupState = setupResult
     }
     //  给setup改为响应式
+    // 将整个setupResult 变成响应式
     instance.setupState = proxyRefs(setupResult)
     if (__DEV__) {
       exposeSetupStateOnRenderContext(instance)
