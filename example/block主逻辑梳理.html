@@ -12,6 +12,7 @@
     <script>
         let blockStack = []
         let currentBlock = null
+        //初始化将快放入栈中利用栈的结构放入block 的子动态元素
         function _openBlock(disableTracking = false) {
             blockStack.push((currentBlock = disableTracking ? null : []))
         }
@@ -19,13 +20,50 @@
             blockStack.pop()
             currentBlock = blockStack[blockStack.length - 1] || null
         }
-        function setupBlock() {
-            
+        function setupBlock(vnode) {
+            vnode.dynamicChildren = currentBlock
             closeBlock()
+            return vnode
         }
-        function _createElementBlock() {
-            return setupBlock(createElement())
+        function createVnode(type,
+            porps, children,
+            isBlockNode = false,
+        ) {
+            const vnode = {
+                type,
+                porps,
+                children,
+                isBlockNode,
+                dynamicChildren: null
+            }
+            if (!isBlockNode && currentBlock) {
+                currentBlock.push(vnode)
+            }
+            return vnode
         }
+        function _createElementBlock(type, porps, children) {
+            // 传入true直接表示当前vnode是一个当前block 的开始
+            return setupBlock(createVnode(type, porps, children, true))
+        }
+        // 我们假设source是一个number 
+        function _renderList(source, renderItem,) {
+            ret = new Array(source)
+            for (let i = 0; i < source; i++) {
+                ret[i] = renderItem(i + 1)
+            }
+            return ret
+        }
+        // 生成vnode 
+        function render(ctx) {
+            return (_openBlock(), _createElementBlock('Fragment', null, [
+                createVnode("div", null, " 11111 ", /* CLASS */),
+                createVnode("div", null, ctx.currentBranch, /* TEXT */),
+                (_openBlock(true), _createElementBlock('Fragment', null, _renderList(5, (i) => {
+                    return (_openBlock(), _createElementBlock("div", null, i, /* TEXT */))
+                })))
+            ]))
+        }
+        console.log(render({ currentBranch: "老骥伏枥" }))
     </script>
 </body>
 
