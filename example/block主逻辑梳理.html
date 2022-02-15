@@ -10,6 +10,9 @@
 
 <body>
     <script>
+        /**
+         * 主要思想就是巧妙的利用栈的结构将动态节点放入dynamicChildren中
+         **/
         let blockStack = []
         let currentBlock = null
         //初始化将快放入栈中利用栈的结构放入block 的子动态元素
