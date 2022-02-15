@@ -9,8 +9,45 @@
 </head>
 
 <body>
+    <h1>runtime和完整版本的实现梳理</h1>
+    <div>
+        众所周知vue项目包含两个版本runtime版本，以及全量的包含编译器的版本
+    </div>
+    <div>
+        他的实现方式对比vue2简单了不少
+    </div>
     <script>
+        /**
+         * 众所周知vue项目包含两个版本runtime版本，以及全量的包含编译器的版本 
+         */
+        // 在vue2中，为了区分runtime版本和全量版本他重写了$mount方法，这也是在一些插件通用的套路，示例代码如下：
+        function compile() {
+            // compile 返回一个render 函数
+            return function render() { }
+        }
+        function Vue() {
 
+        }
+        Vue.prototype.$mount = function () {
+            //原始的$mount方法
+            console.log(执行原来的$mount方法)
+        }
+        const mount = Vue.prototype.$mount
+        Vue.prototype.$mount = function () {
+            // 在这里面加入compile
+            const render = compile()
+            // 执行之前的mount方法
+            return mount()
+        }
+        // 而在vue3中巧妙的利用一个注册方法和一个全局的变量无需破坏vue内部方法就能实现分别打包runtime和完整版
+        // 一个全局变量
+        let compile
+        function registerRuntimeCompiler(_compile) {
+            //将当前模板编译器赋值方便当前模板内别的函数能调用到
+            //之所以要有这个注册方法，是为了让runtime 中使用
+            compile = _compile
+        }
+        // 如此一来在代码导出时，只需要在在非runtime版本中使用注册方法注册即可
     </script>
 </body>
 
