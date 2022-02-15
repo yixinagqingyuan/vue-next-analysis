@@ -234,6 +234,7 @@ export let currentBlock: VNode[] | null = null
  * disableTracking is true when creating a v-for fragment block, since a v-for
  * fragment always diffs its children.
  *
+ *其实是为了区分静态节和动态节点
  * @private
  */
 export function openBlock(disableTracking = false) {
@@ -304,7 +305,7 @@ export function createElementBlock(
       patchFlag,
       dynamicProps,
       shapeFlag,
-      true /* isBlock */
+      true /* isBlock */ // 直接表示为true 表示他是静态节点
     )
   )
 }
@@ -469,8 +470,9 @@ function createBaseVNode(
   if (
     isBlockTreeEnabled > 0 &&
     // avoid a block node from tracking itself
-    !isBlockNode &&
+    !isBlockNode && 
     // has current parent block
+    //具有当前父块
     currentBlock &&
     // presence of a patch flag indicates this node needs patching on updates.
     // component nodes also should always be patched, because even if the
@@ -481,6 +483,7 @@ function createBaseVNode(
     // vnode should not be considered dynamic due to handler caching.
     vnode.patchFlag !== PatchFlags.HYDRATE_EVENTS
   ) {
+    // 所以当currentBlock 没有内容的时候表示没有动态节点，为静态节点
     currentBlock.push(vnode)
   }
 

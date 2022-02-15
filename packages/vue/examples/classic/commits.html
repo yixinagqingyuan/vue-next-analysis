@@ -2,13 +2,30 @@
 
 <div id="demo">
   <div>
-    好好上班
+    11111
+  </div>
+  <div>
+    {{currentBranch}}
+  </div>
+  <div v-for=" i in 5">
+    {{i}}
   </div>
 </div>
 
 <script>
   const API_URL = `https://api.github.com/repos/vuejs/vue-next/commits?per_page=3&sha=`
+  const scope = Vue.effectScope()
+  const a = scope.run(() => {
+    const doubled = Vue.computed(() => console.log(111))
 
+    Vue.watch(doubled, () => console.log(22222))
+
+    Vue.watchEffect(() => console.log('Count: ', 333333))
+    return 111225
+  })
+  console.log(a)
+  // 处理该作用域内的所有 effect
+  // scope.stop()
   Vue.createApp({
     data: () => ({
       branches: ['master', 'sync'],
@@ -41,6 +58,13 @@
       }
     }
   }).mount('#demo')
+
+  function ba() {
+    return 2, 3
+  }
+  console.log(ba())
+
+
 </script>
 
 <style>

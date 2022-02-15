@@ -39,7 +39,7 @@ export class EffectScope {
       warn(`cannot run an inactive effect scope.`)
     }
   }
-// 开始依收集了，将当前实例压栈,这样能有顺序的处理active实例
+  // 依赖追踪使用
   on() {
     if (this.active) {
       effectScopeStack.push(this)
@@ -99,7 +99,7 @@ export function onScopeDispose(fn: () => void) {
   } else if (__DEV__) {
     warn(
       `onScopeDispose() is called when there is no active effect scope` +
-        ` to be associated with.`
+      ` to be associated with.`
     )
   }
 }

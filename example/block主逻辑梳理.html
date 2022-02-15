@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        let blockStack = []
+        let currentBlock = null
+        function _openBlock(disableTracking = false) {
+            blockStack.push((currentBlock = disableTracking ? null : []))
+        }
+        function closeBlock() {
+            blockStack.pop()
+            currentBlock = blockStack[blockStack.length - 1] || null
+        }
+        function setupBlock() {
+            
+            closeBlock()
+        }
+        function _createElementBlock() {
+            return setupBlock(createElement())
+        }
+    </script>
+</body>
+
+</html>

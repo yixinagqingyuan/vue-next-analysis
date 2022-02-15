@@ -1433,6 +1433,7 @@ function baseCreateRenderer(
           }
           // 生成vnode 也就是执行rendere 的地方，同样的里面也用try catch包着，防止报错
           // 执行render 的时候开始依赖收集
+          // 当前方法执行完成，依赖收集就结束了
           const subTree = (instance.subTree = renderComponentRoot(instance))
           if (__DEV__) {
             endMeasure(instance, `render`)
@@ -1609,10 +1610,11 @@ function baseCreateRenderer(
 
     // 为渲染创建反应效果
     // 也就是2版本的watcher 
+    // 每个组件都被包装为一个effect
     const effect = (instance.effect = new ReactiveEffect(
       componentUpdateFn,
       () => queueJob(instance.update),
-      instance.scope // track it in component's effect scope
+      instance.scope // track it in component's effect scope 在组件的影响范围内跟踪它 依赖追踪使用
     ))
     //watcher 中的更新函数
     const update = (instance.update = effect.run.bind(effect) as SchedulerJob)
