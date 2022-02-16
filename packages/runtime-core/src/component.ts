@@ -657,7 +657,7 @@ function setupStatefulComponent(
     const setupContext = (instance.setupContext =
       setup.length > 1 ? createSetupContext(instance) : null)
     // 封装一下将当前活动的实例压栈,这是为了后续能拿到当前执行的组件实例
-    // 将当前实例存入到了数组中
+    // 将当前实例存入到了数组中可能为了effectScope
     setCurrentInstance(instance)
     //  暂时没研究明白干嘛 
     pauseTracking()

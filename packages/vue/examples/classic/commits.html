@@ -10,20 +10,24 @@
   <div v-for=" i in 5">
     {{i}}
   </div>
+  <div @click="handleClick">
+    {{double}}
+  </div>
 </div>
 
 <script>
   const API_URL = `https://api.github.com/repos/vuejs/vue-next/commits?per_page=3&sha=`
-  const scope = Vue.effectScope()
-  const a = scope.run(() => {
-    const doubled = Vue.computed(() => console.log(111))
+  // const scope = Vue.effectScope()
+  // debugger
+  // const a = scope.run(() => {
+  //   const doubled = Vue.computed(() => console.log(111))
 
-    Vue.watch(doubled, () => console.log(22222))
+  //   Vue.watch(doubled, () => console.log(22222))
 
-    Vue.watchEffect(() => console.log('Count: ', 333333))
-    return 111225
-  })
-  console.log(a)
+  //   Vue.watchEffect(() => console.log('Count: ', 333333))
+  //   return 111225
+  // })
+  // console.log(a)
   // 处理该作用域内的所有 effect
   // scope.stop()
   Vue.createApp({
@@ -32,10 +36,26 @@
       currentBranch: 'master',
       commits: null
     }),
+    setup() {
+      const num = Vue.ref(1)
+      console.log(num)
+      const double = Vue.computed(() => {
+        console.log(1111)
+        debugger
+        return num.value * 2
+      })
+      function handleClick() {
 
-    created() {
-      this.fetchData()
+        num.value++
+      }
+      return {
+        double,
+        handleClick
+      }
     },
+    // created() {
+    //   this.fetchData()
+    // },
 
     watch: {
       currentBranch: 'fetchData'
@@ -59,10 +79,10 @@
     }
   }).mount('#demo')
 
-  function ba() {
-    return 2, 3
-  }
-  console.log(ba())
+  // function ba() {
+  //   return 2, 3
+  // }
+  // console.log(ba())
 
 
 </script>

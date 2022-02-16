@@ -48,6 +48,15 @@
             compile = _compile
         }
         // 如此一来在代码导出时，只需要在在非runtime版本中使用注册方法注册即可
+        //finishComponentSetup 内部包含编译逻辑
+        function finishComponentSetup(instance) {
+            Component = instance.type
+            // 只需要判断有没有compile并且有没有render 即可
+            if (compile && !Component.render) {
+                // 执行编译逻辑
+            }
+
+        }
     </script>
 </body>
 

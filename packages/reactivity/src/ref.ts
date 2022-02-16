@@ -27,10 +27,13 @@ type RefBase<T> = {
   value: T
 }
 
+// ref就是一个effect 
 export function trackRefValue(ref: RefBase<any>) {
   if (isTracking()) {
     ref = toRaw(ref)
+    //开始创建小管家
     if (!ref.dep) {
+      // 在effect 中已经声明默认为空值，如果没有俺么就在创建一个
       ref.dep = createDep()
     }
     if (__DEV__) {
@@ -40,6 +43,7 @@ export function trackRefValue(ref: RefBase<any>) {
         key: 'value'
       })
     } else {
+      // 给小管家穿进去建立关系
       trackEffects(ref.dep)
     }
   }
@@ -210,7 +214,7 @@ class ObjectRefImpl<T extends object, K extends keyof T> {
     private readonly _object: T,
     private readonly _key: K,
     private readonly _defaultValue?: T[K]
-  ) {}
+  ) { }
 
   get value() {
     const val = this._object[this._key]
@@ -268,17 +272,17 @@ type BaseTypes = string | number | boolean
  * augmentations in its generated d.ts, so we have to manually append them
  * to the final generated d.ts in our build process.
  */
-export interface RefUnwrapBailTypes {}
+export interface RefUnwrapBailTypes { }
 
 export type ShallowUnwrapRef<T> = {
   [K in keyof T]: T[K] extends Ref<infer V>
-    ? V
-    : // if `V` is `unknown` that means it does not extend `Ref` and is undefined
-    T[K] extends Ref<infer V> | undefined
-    ? unknown extends V
-      ? undefined
-      : V | undefined
-    : T[K]
+  ? V
+  : // if `V` is `unknown` that means it does not extend `Ref` and is undefined
+  T[K] extends Ref<infer V> | undefined
+  ? unknown extends V
+  ? undefined
+  : V | undefined
+  : T[K]
 }
 
 export type UnwrapRef<T> = T extends ShallowRef<infer V>
@@ -298,6 +302,6 @@ export type UnwrapRefSimple<T> = T extends
   ? { [K in keyof T]: UnwrapRefSimple<T[K]> }
   : T extends object & { [ShallowReactiveMarker]?: never }
   ? {
-      [P in keyof T]: P extends symbol ? T[P] : UnwrapRef<T[P]>
-    }
+    [P in keyof T]: P extends symbol ? T[P] : UnwrapRef<T[P]>
+  }
   : T

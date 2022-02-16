@@ -18,6 +18,7 @@ type KeyToDepMap = Map<any, Dep>
 const targetMap = new WeakMap<any, KeyToDepMap>()
 
 // The number of effects currently being tracked recursively.
+//当前递归跟踪的效果数。
 let effectTrackDepth = 0
 
 export let trackOpBit = 1
@@ -27,6 +28,11 @@ export let trackOpBit = 1
  * This value is chosen to enable modern JS engines to use a SMI on all platforms.
  * When recursion depth is greater, fall back to using a full cleanup.
  */
+/**
+*按位轨迹标记最多支持30级递归。
+*选择此值是为了使现代JS引擎能够在所有平台上使用SMI。
+*当递归深度更大时，返回到使用完全清理。
+*/
 const maxMarkerBits = 30
 
 export type EffectScheduler = (...args: any[]) => any
@@ -222,12 +228,18 @@ export function trackEffects(
     }
   } else {
     // Full cleanup mode.
+    // 判断当前小管家里面有没有，如果有了那么就是false 如果没有就是trues
     shouldTrack = !dep.has(activeEffect!)
   }
-
+  // 如果有，就表示应该追踪
   if (shouldTrack) {
+    //搜集依赖放到小管家里面
     dep.add(activeEffect!)
+    // 反向放一个，建立关系
+    // 之所以这样是为了在当前的activeeffect计算完成之后，能够清理没有被用的到dep
+    // dep 和 activeEffect 是多对多的关系
     activeEffect!.deps.push(dep)
+    //dev 环境暂时不看
     if (__DEV__ && activeEffect!.onTrack) {
       activeEffect!.onTrack(
         Object.assign(
