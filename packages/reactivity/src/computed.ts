@@ -50,7 +50,9 @@ class ComputedRefImpl<T> {
   get value() {
     // the computed ref may get wrapped by other proxies e.g. readonly() #3376
     const self = toRaw(this)
+    // 所以他是不做依赖收集的
     trackRefValue(self)
+    // 暂时能想到是为了防止重复收集依赖
     if (self._dirty) {
       self._dirty = false
       self._value = self.effect.run()!
@@ -83,8 +85,8 @@ export function computed<T>(
     getter = getterOrOptions
     setter = __DEV__
       ? () => {
-          console.warn('Write operation failed: computed value is readonly')
-        }
+        console.warn('Write operation failed: computed value is readonly')
+      }
       : NOOP
   } else {
     getter = getterOrOptions.get

@@ -126,19 +126,23 @@
         // // }, 2000)
         // num.value++
         const count = Vue.ref(1)
+        // 这个情况下是没有依赖收集的
         const plusOne = Vue.computed(() => {
-            
+
             console.log(count.value)
             return count.value + 1
         })
-
+        // console.log({ plusOne: plusOne })
+        // debugger
         console.log(plusOne.value) // 2
-        setTimeout(() => {
-            console.log(count.value)
-            count.value++
-            // console.log(plusOne.value) // 2
-        }, 2000)
-
+        count.value++
+        console.log(plusOne.value)
+        // setTimeout(() => {
+        //     console.log(count.value)
+        //     count.value++
+        //     // console.log(plusOne.value) // 2
+        // }, 2000)
+        count.value++
     </script>
 </body>
 
