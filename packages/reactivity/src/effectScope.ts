@@ -62,6 +62,7 @@ export class EffectScope {
         this.scopes.forEach(e => e.stop(true))
       }
       // nested scope, dereference from parent to avoid memory leaks
+      //嵌套作用域，从父级取消引用以避免内存泄漏
       if (this.parent && !fromParent) {
         // optimized O(1) removal
         const last = this.parent.scopes!.pop()

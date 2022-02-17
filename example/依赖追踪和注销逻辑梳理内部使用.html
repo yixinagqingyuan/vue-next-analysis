@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>
+        依赖追踪和注销逻辑梳理
+    </h1>
+    <div>
+        依赖追踪的api <a href="https://v3.cn.vuejs.org/api/effect-scope.html#effectscope">effectScope</a> 其实已经被暴露出来供用户使用
+    </div>
+    <div>
+        这个api的本质就是为了更方便的管理副作用的收集和销毁。在源码内部使用的也是当前api
+    </div>
+    <div>
+        为什么要有effectScope？
+    </div>
+    <div>
+        具体请看vuerfc 的 <a
+            href="https://github.com/vuejs/rfcs/blob/master/active-rfcs/0041-reactivity-effect-scope.md"></a> rc
+    </div>
+    <script src="../packages/vue/dist/vue.global.js"></script>
+    <script>
+        //具体实现逻辑实例:
+        let activeEffectScope
+        const effectScopeStack = []
+
+        class EffectScope {
+            // active 的作用是为了防止执行stop销毁之再次执行当前实例的方法依然生效
+            active = true
+            effects = []
+            cleanups = []
+            parent
+            scopes
+            index
+            constructor(detached = false) {
+                if (!detached && activeEffectScope) {
+                    this.parent = activeEffectScope
+                    this.index =
+                        (activeEffectScope.scopes || (activeEffectScope.scopes = [])).push(
+                            this
+                        ) - 1
+                }
+            }
+
+            run(fn) {
+                if (this.active) {
+                    try {
+                        this.on()
+                        return fn()
+                    } finally {
+                        this.off()
+                    }
+                }
+            }
+            // 依赖追踪使用
+            on() {
+                if (this.active) {
+                    effectScopeStack.push(this)
+                    activeEffectScope = this
+                }
+            }
+
+            off() {
+                if (this.active) {
+                    effectScopeStack.pop()
+                    activeEffectScope = effectScopeStack[effectScopeStack.length - 1]
+                }
+            }
+
+            stop(fromParent) {
+                if (this.active) {
+                    this.effects.forEach(e => e.stop())
+                    this.cleanups.forEach(cleanup => cleanup())
+                    if (this.scopes) {
+                        this.scopes.forEach(e => e.stop(true))
+                    }
+                    this.active = false
+                }
+            }
+        }
+        // 建立关联的函数，当前函数在computed、watch、watchEffect等函数中使用
+        function recordEffectScope(
+            effect,
+            scope
+        ) {
+            scope = scope || activeEffectScope
+            if (scope && scope.active) {
+                scope.effects.push(effect)
+            }
+        }
+        // vue的内部使用
+        // 在页面内部使用EffectScope是为了在组件销毁的时候卸载依赖
+        // 组件销毁方法
+        function unmountComponent() {
+
+        }
+        // 组件初始化方法
+        function mountComponent() {
+
+        }
+        // 创建组件实例
+        function createComponentInstance(vnode, parent) {
+            // 拿到类型
+            const type = vnode.type
+            const instance = {
+                vnode,
+                type,
+                parent,
+                scope: new EffectScope(true /* detached */),
+                render: null,
+                subTree: null, // will be set synchronously right after creation
+                effect: null,
+                update: null, // will be set synchronously right after creation
+            }
+        }
+
+    </script>
+</body>
+
+</html>

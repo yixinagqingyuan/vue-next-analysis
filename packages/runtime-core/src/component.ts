@@ -583,7 +583,7 @@ export function isStatefulComponent(instance: ComponentInternalInstance) {
 
 export let isInSSRComponentSetup = false
 // 初始化组件，包含组件的编译
-export function  setupComponent(
+export function setupComponent(
   instance: ComponentInternalInstance,
   isSSR = false
 ) {
@@ -1010,3 +1010,7 @@ export function formatComponentName(
 export function isClassComponent(value: unknown): value is ClassComponent {
   return isFunction(value) && '__vccOpts' in value
 }
+
+let a = null!
+
+a = undefined

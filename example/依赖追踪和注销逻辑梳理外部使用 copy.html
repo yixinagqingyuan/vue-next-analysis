@@ -97,10 +97,12 @@
         }
 
         //1、 在外部使用
+        // 由于源码中recordEffectScope 被保存在vue 的对象中无法获取
         //为了能模拟源码中调用recordEffectScope 方法重写 computed 
         const computed = Vue.computed
         Vue.computed = function (fn) {
             const val = computed(fn)
+            // 模拟拿到effect
             recordEffectScope(val.effect)
             return val
         }
@@ -110,39 +112,19 @@
         }
 
         const scope = effectScope()
-        // const num = Vue.ref(0)
-        // const doubled = Vue.computed(() => {
-        //     console.log(1111)
-        //     return num.value * 2
-        // })
-        // const val = scope.run(() => {
+        const num = Vue.ref(0)
 
-        //     return '他还能有返回值'
-        // })
-        // // console.log(val)
-        // // setTimeout(() => {
-
-
-        // // }, 2000)
-        // num.value++
-        const count = Vue.ref(1)
-        // 这个情况下是没有依赖收集的
-        const plusOne = Vue.computed(() => {
-
-            console.log(count.value)
-            return count.value + 1
+        const val = scope.run(() => {
+            //这个情况下是没有依赖收集的
+            const doubled = Vue.computed(() => {
+                console.log(1111)
+                return num.value * 2
+            })
+            return '他还能有返回值'
         })
-        // console.log({ plusOne: plusOne })
-        // debugger
-        console.log(plusOne.value) // 2
-        count.value++
-        console.log(plusOne.value)
-        // setTimeout(() => {
-        //     console.log(count.value)
-        //     count.value++
-        //     // console.log(plusOne.value) // 2
-        // }, 2000)
-        count.value++
+        num.value++
+        // 卸载了所有的依赖
+        scope.stop()
     </script>
 </body>
 

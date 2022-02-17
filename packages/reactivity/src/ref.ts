@@ -49,7 +49,7 @@ export function trackRefValue(ref: RefBase<any>) {
   }
 }
 
-export function triggerRefValue(ref: RefBase<any>, newVal?: any) {
+export function  triggerRefValue(ref: RefBase<any>, newVal?: any) {
   ref = toRaw(ref)
   if (ref.dep) {
     if (__DEV__) {

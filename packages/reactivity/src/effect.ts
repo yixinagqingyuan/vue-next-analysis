@@ -350,6 +350,7 @@ export function triggerEffects(
       if (__DEV__ && effect.onTrigger) {
         effect.onTrigger(extend({ effect }, debuggerEventExtraInfo))
       }
+      // 当前的scheduler 是外部传进来的变量的部分，为了让当前effect 方法通用
       if (effect.scheduler) {
         effect.scheduler()
       } else {
