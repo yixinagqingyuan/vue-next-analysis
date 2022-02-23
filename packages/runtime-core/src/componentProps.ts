@@ -63,41 +63,41 @@ export interface PropOptions<T = any, D = T> {
 export type PropType<T> = PropConstructor<T> | PropConstructor<T>[]
 
 type PropConstructor<T = any> =
-  | { new (...args: any[]): T & {} }
+  | { new(...args: any[]): T & {} }
   | { (): T }
   | PropMethod<T>
 
 type PropMethod<T, TConstructor = any> = [T] extends [
   ((...args: any) => any) | undefined
 ] // if is function with args, allowing non-required functions
-  ? { new (): TConstructor; (): T; readonly prototype: TConstructor } // Create Function like constructor
+  ? { new(): TConstructor; (): T; readonly prototype: TConstructor } // Create Function like constructor
   : never
 
 type RequiredKeys<T> = {
   [K in keyof T]: T[K] extends
-    | { required: true }
-    | { default: any }
-    // don't mark Boolean props as undefined
-    | BooleanConstructor
-    | { type: BooleanConstructor }
-    ? T[K] extends { default: undefined | (() => undefined) }
-      ? never
-      : K
-    : never
+  | { required: true }
+  | { default: any }
+  // don't mark Boolean props as undefined
+  | BooleanConstructor
+  | { type: BooleanConstructor }
+  ? T[K] extends { default: undefined | (() => undefined) }
+  ? never
+  : K
+  : never
 }[keyof T]
 
 type OptionalKeys<T> = Exclude<keyof T, RequiredKeys<T>>
 
 type DefaultKeys<T> = {
   [K in keyof T]: T[K] extends
-    | { default: any }
-    // Boolean implicitly defaults to false
-    | BooleanConstructor
-    | { type: BooleanConstructor }
-    ? T[K] extends { type: BooleanConstructor; required: true } // not default if Boolean is marked as required
-      ? never
-      : K
-    : never
+  | { default: any }
+  // Boolean implicitly defaults to false
+  | BooleanConstructor
+  | { type: BooleanConstructor }
+  ? T[K] extends { type: BooleanConstructor; required: true } // not default if Boolean is marked as required
+  ? never
+  : K
+  : never
 }[keyof T]
 
 type InferPropType<T> = [T] extends [null]
@@ -112,18 +112,18 @@ type InferPropType<T> = [T] extends [null]
   ? Date
   : [T] extends [(infer U)[] | { type: (infer U)[] }]
   ? U extends DateConstructor
-    ? Date | InferPropType<U>
-    : InferPropType<U>
+  ? Date | InferPropType<U>
+  : InferPropType<U>
   : [T] extends [Prop<infer V, infer D>]
   ? unknown extends V
-    ? IfAny<V, V, D>
-    : V
+  ? IfAny<V, V, D>
+  : V
   : T
 
 export type ExtractPropTypes<O> = O extends object
   ? { [K in keyof O]?: unknown } & // This is needed to keep the relation between the option prop and the props, allowing to use ctrl+click to navigate to the prop options. see: #3656
-      { [K in RequiredKeys<O>]: InferPropType<O[K]> } &
-      { [K in OptionalKeys<O>]?: InferPropType<O[K]> }
+  { [K in RequiredKeys<O>]: InferPropType<O[K]> } &
+  { [K in OptionalKeys<O>]?: InferPropType<O[K]> }
   : { [K in string]: any }
 
 const enum BooleanFlags {
@@ -139,9 +139,9 @@ export type ExtractDefaultPropTypes<O> = O extends object
 type NormalizedProp =
   | null
   | (PropOptions & {
-      [BooleanFlags.shouldCast]?: boolean
-      [BooleanFlags.shouldCastTrue]?: boolean
-    })
+    [BooleanFlags.shouldCast]?: boolean
+    [BooleanFlags.shouldCastTrue]?: boolean
+  })
 
 // normalized value is a tuple of the actual normalized options
 // and an array of prop keys that need value casting (booleans and defaults)
@@ -356,7 +356,7 @@ function setFullProps(
         if (!needCastKeys || !needCastKeys.includes(camelKey)) {
           props[camelKey] = value
         } else {
-          ;(rawCastValues || (rawCastValues = {}))[camelKey] = value
+          ; (rawCastValues || (rawCastValues = {}))[camelKey] = value
         }
       } else if (!isEmitListener(instance.emitsOptions, key)) {
         // Any non-declared (either as a prop or an emitted event) props are put

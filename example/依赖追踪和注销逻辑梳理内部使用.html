@@ -25,6 +25,7 @@
         具体请看vuerfc 的 <a
             href="https://github.com/vuejs/rfcs/blob/master/active-rfcs/0041-reactivity-effect-scope.md"></a> rc
     </div>
+    <div id="app"></div>
     <script src="../packages/vue/dist/vue.global.js"></script>
     <script>
         //具体实现逻辑实例:
@@ -97,13 +98,43 @@
         }
         // vue的内部使用
         // 在页面内部使用EffectScope是为了在组件销毁的时候卸载依赖
-        // 组件销毁方法
-        function unmountComponent() {
 
+        //当前实例
+        let currentInstance = null
+        // 设置当前实例
+        const setCurrentInstance = (instance) => {
+            currentInstance = instance
+            instance.scope.on()
         }
-        // 组件初始化方法
-        function mountComponent() {
-
+        function parentNode(node) {
+            return node.parentNode
+        }
+        // 容错处理
+        function callWithErrorHandling(
+            fn,
+            instancel,
+            args
+        ) {
+            let res
+            try {
+                res = args ? fn(...args) : fn()
+            } catch (err) {
+                handleError(err, instance)
+            }
+            return res
+        }
+        // 建立响应式
+        function proxyRefs(objectWithRefs) {
+            return new Proxy(objectWithRefs, {
+                get: (target, key, receiver) => Reflect.get(target, key, receiver),
+                set: (target, key, value, receiver) => {
+                    return Reflect.set(target, key, value, receiver)
+                }
+            })
+        }
+        function handleSetupResult(instance, setupResult) {
+            instance.setupState = proxyRefs(setupResult)
+            // 下方还有编译的内容，这里暂时省略
         }
         // 创建组件实例
         function createComponentInstance(vnode, parent) {
@@ -113,14 +144,166 @@
                 vnode,
                 type,
                 parent,
+                // 此时已经创建了一个EffectScope 为了批量处理依赖
                 scope: new EffectScope(true /* detached */),
                 render: null,
-                subTree: null, // will be set synchronously right after creation
+                subTree: null,
                 effect: null,
-                update: null, // will be set synchronously right after creation
+                update: null,
+            }
+            return instance
+        }
+        // 组件销毁方法
+        function unmountComponent() {
+
+        }
+        //创建vnode  
+        function createVnode(
+            type,
+            props,
+            children,
+            patchFlag = 0
+        ) {
+            const vnode = {
+                type,
+                props,
+                children,
+                patchFlag,
+                component: null,
+            }
+            return vnode
+        }
+        // patch 包含各种组件，节点，注释等内容的挂载，这里为了分析依赖追踪，我们只分析组件的挂载
+        function patch(n1, n2, container) {
+            // 如果相等就返回表示没变
+            if (n1 === n2) {
+                return
+            }
+            const { type } = n2
+            switch (type) {
+                // 前面逻辑省略，我们只处理组件类型和普通节点类型
+                default:
+                    processComponent(n1, n2, container)
+
             }
         }
+        function setupStatefulComponent(instance) {
+            const Component = instance.type
+            const { setup } = Component
+            if (setup) {
+                setCurrentInstance(instance)
+                // 拿到setup结果
+                const setupResult = callWithErrorHandling(
+                    setup,
+                    instance,
+                    [instance.props]
+                )
+                // 这里我们只判断返回对象的情况，不考虑别的情况
+                handleSetupResult(instance, setupResult)
+            }
+        }
+        // 执行setup函数
+        function setupComponent(instance) {
+            // 上方的一些不重要的逻辑暂不处理，执行核心逻辑
+            const setupResult = setupStatefulComponent(instance)
+            return setupResult
+        }
+        // 拿到vnode
+        function renderComponentRoot(instance) {
+            // 源码中使用一个Proxy来代理所有的响应式内容的访问和修改 并且存入 instance.proxy中，统一处理
+            // 我们这里只是为了梳理主流程 只需要setupState即可 porps 暂不考虑
+            const {
+                type: Component,
+                render,
+                setupState,
+            } = instance
+            result = render.call(
+                setupState,
+                setupState,
+            )
+            return result
+        }
+        // 依赖收集 生成effect
+        function setupRenderEffect(instance, n2, container) {
+            const componentUpdateFn = () => {
+                const nextTree = renderComponentRoot(instance)
+                const prevTree = instance.subTree
+                instance.subTree = nextTree
+                // 这是组件内部的patch走diff 
+                patch(
+                    prevTree,
+                    nextTree,
+                    parentNode(subTree.el),
+                )
+            }
+            // 这里直接调用内部的ReactiveEffect即可不用自己重写
+            const effect = (instance.effect = new Vue.ReactiveEffect(
+                componentUpdateFn,
+                null,
+                instance.scope // track it in component's effect scope 在组件的影响范围内跟踪它 依赖追踪使用
+            ))
+            const update = (instance.update = effect.run.bind(effect))
+            updat()
+        }
 
+
+        // 组件初始化方法
+        function mountComponent(n2, container) {
+            const instance =
+                (initialVNode.component = createComponentInstance(
+                    initialVNode,
+                    parentComponent,
+                ))
+            // 执行setup 
+            setupComponent(instance)
+            // 依赖收集
+            setupRenderEffect(instance, n2, container)
+        }
+        // 组件更新 
+        function updateComponent() {
+            // 更新逻辑咱暂时不看
+        }
+        // 组件类型的处理，里面包含mount和update 
+        function processComponent(n1, n2, container) {
+            if (n1 == null) {
+                mountComponent(n2, container)
+            } else {
+                updateComponent()
+            }
+
+        }
+        // render 组件的初始化主要就是执行path
+        function render(rootComponent, rootProps = null) {
+            const vnode = createVNode(
+                rootComponent,
+                rootProps
+            )
+            path(null, vnode, 'app')
+        }
+        render({
+            setup() {
+                const num = Vue.ref(1)
+                console.log(num)
+                const double = Vue.computed(() => {
+                    console.log(1111)
+                    debugger
+                    return num.value * 2
+                })
+                function handleClick() {
+                    num.value++
+                }
+                return {
+                    double,
+                    handleClick
+                }
+            },
+            render(_ctx) {
+                with (_ctx) {
+                    return createVnode("div", { onClick: handleClick }, double)
+                }
+
+            }
+        })
     </script>
 </body>
 

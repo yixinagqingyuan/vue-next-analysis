@@ -1251,6 +1251,7 @@ function baseCreateRenderer(
     const compatMountInstance =
       __COMPAT__ && initialVNode.isCompatRoot && initialVNode.component
     // 保存一下组件的实例 如果找不到就创建一个
+    // 在创建的时候，就创建了EffectScope 确定了依赖追踪
     const instance: ComponentInternalInstance =
       compatMountInstance ||
       (initialVNode.component = createComponentInstance(
@@ -1258,11 +1259,11 @@ function baseCreateRenderer(
         parentComponent,
         parentSuspense
       ))
-    // div 环境暂不讨论
+    // dv 环境暂不讨论
     if (__DEV__ && instance.type.__hmrId) {
       registerHMR(instance)
     }
-
+    // dev 不讨论
     if (__DEV__) {
       pushWarningContext(initialVNode)
       startMeasure(instance, `mount`)

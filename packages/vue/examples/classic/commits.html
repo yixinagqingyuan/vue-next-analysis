@@ -4,7 +4,7 @@
   <div class="currentBranchS">
     11111
   </div>
-  <div>
+  <div @click="handleClick">
     {{currentBranch}}
   </div>
   <div v-for=" i in 5">
@@ -29,7 +29,8 @@
   // })
   // console.log(a)
   // 处理该作用域内的所有 effect
-  // scope.stop()
+  // scope.stop()∫
+  debugger
   Vue.createApp({
     data: () => ({
       branches: ['master', 'sync'],
@@ -45,7 +46,7 @@
         return num.value * 2
       })
       function handleClick() {
-        
+
         num.value++
       }
       return {

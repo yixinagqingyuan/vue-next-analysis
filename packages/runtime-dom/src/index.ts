@@ -72,6 +72,7 @@ export const hydrate = ((...args) => {
 // runtime-dom 中就包含创建函数
 // 当前创建函数为了能链式调用，会在封装函数在吐出来配置来达到目的，createApp 为创建应用工厂
 export const createApp = ((...args) => {
+  // args是给传入的多个参数放入数组中，
   // 接收配置给在在传人下层函数 这里的args其实就是创建的时候传入的配置
   const app = ensureRenderer().createApp(...args)
 

@@ -459,7 +459,7 @@ export function createComponentInstance(
   // 如果他爹没有那么就床架哪一个
   const appContext =
     (parent ? parent.appContext : vnode.appContext) || emptyAppContext
-
+  // 创建当前组件实例
   const instance: ComponentInternalInstance = {
     uid: uid++,
     vnode,
@@ -535,19 +535,22 @@ export function createComponentInstance(
     ec: null,
     sp: null
   }
+  // dev 环境暂不考虑
   if (__DEV__) {
     instance.ctx = createDevRenderContext(instance)
   } else {
+    // 相当于做个备份吧
     instance.ctx = { _: instance }
   }
   instance.root = parent ? parent.root : instance
   instance.emit = emit.bind(null, instance)
 
   // apply custom element special handling
+  //应用自定义元素进行特殊处理
   if (vnode.ce) {
     vnode.ce(instance)
   }
-
+  // 返回组件实例
   return instance
 }
 
