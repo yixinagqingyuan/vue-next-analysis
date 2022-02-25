@@ -31,7 +31,6 @@
         //具体实现逻辑实例:
         let activeEffectScope
         const effectScopeStack = []
-
         class EffectScope {
             // active 的作用是为了防止执行stop销毁之再次执行当前实例的方法依然生效
             active = true
@@ -86,11 +85,31 @@
                 }
             }
         }
+
+        const nodeOps = {
+            insert: (child, parent) => {
+                parent.insertBefore(child, null)
+            },
+            createElement: (tag) => {
+                return document.createElement(tag)
+            },
+        }
+        const computed = Vue.computed
+        Vue.computed = function (fn) {
+            const val = computed(fn)
+            // 模拟拿到effect
+            recordEffectScope(val.effect)
+            return val
+        }
+        const ref = Vue.ref
+        Vue.ref = function (val) {
+            const newRef = ref(val)
+            // 模拟拿到effect
+            recordEffectScope(val.effect)
+            return newRef
+        }
         // 建立关联的函数，当前函数在computed、watch、watchEffect等函数中使用
-        function recordEffectScope(
-            effect,
-            scope
-        ) {
+        function recordEffectScope(effect, scope) {
             scope = scope || activeEffectScope
             if (scope && scope.active) {
                 scope.effects.push(effect)
@@ -119,7 +138,7 @@
             try {
                 res = args ? fn(...args) : fn()
             } catch (err) {
-                handleError(err, instance)
+                console.error(err)
             }
             return res
         }
@@ -132,9 +151,16 @@
                 }
             })
         }
+        // 赋值render函数，咱们这里暂不处理编译相关，只赋值render 函数即可
+        function finishComponentSetup(instance) {
+            Component = instance.type
+            // 中间可能有编译过程，暂时省略不处理
+            instance.render = Component.render
+        }
         function handleSetupResult(instance, setupResult) {
             instance.setupState = proxyRefs(setupResult)
-            // 下方还有编译的内容，这里暂时省略
+            // 下方还有编译的内容
+            finishComponentSetup(instance)
         }
         // 创建组件实例
         function createComponentInstance(vnode, parent) {
@@ -153,22 +179,43 @@
             }
             return instance
         }
+        // 组件类型的处理，里面包含mount和update 
+        function processComponent(n1, n2, container) {
+            if (n1 == null) {
+                mountComponent(n2, container)
+            } else {
+                updateComponent()
+            }
+
+        }
+        // 节点初始化
+        function mountElement(n2, container) {
+            let el = nodeOps.createElement(n2.type)
+            nodeOps.insert(el, container)
+        }
+        // 节点类型的处理
+        function processElement(n1, n2, container) {
+            if (n1 == null) {
+                // 如果第一次没有，那么就是走mountelement的类型
+                mountElement(
+                    n2,
+                    container
+                )
+            } else {
+                // 接下来就是组件更新，走的是patch的内容，内部包含diff，也就是最核心的内容
+            }
+        }
         // 组件销毁方法
         function unmountComponent() {
 
         }
         //创建vnode  
-        function createVnode(
-            type,
-            props,
-            children,
-            patchFlag = 0
-        ) {
+        function createVNode(type, props, children, shapeFlag = 1) {
             const vnode = {
                 type,
                 props,
                 children,
-                patchFlag,
+                shapeFlag,
                 component: null,
             }
             return vnode
@@ -179,11 +226,16 @@
             if (n1 === n2) {
                 return
             }
-            const { type } = n2
+            const { type, shapeFlag } = n2
             switch (type) {
                 // 前面逻辑省略，我们只处理组件类型和普通节点类型
                 default:
-                    processComponent(n1, n2, container)
+                    if (shapeFlag & 1) {
+                        processElement(n1, n2, container)
+                    } else {
+                        processComponent(n1, n2, container)
+                    }
+
 
             }
         }
@@ -233,7 +285,7 @@
                 patch(
                     prevTree,
                     nextTree,
-                    parentNode(subTree.el),
+                    container,
                 )
             }
             // 这里直接调用内部的ReactiveEffect即可不用自己重写
@@ -243,12 +295,11 @@
                 instance.scope // track it in component's effect scope 在组件的影响范围内跟踪它 依赖追踪使用
             ))
             const update = (instance.update = effect.run.bind(effect))
-            updat()
+            update()
         }
 
-
         // 组件初始化方法
-        function mountComponent(n2, container) {
+        function mountComponent(initialVNode, container, parentComponent = null) {
             const instance =
                 (initialVNode.component = createComponentInstance(
                     initialVNode,
@@ -257,30 +308,28 @@
             // 执行setup 
             setupComponent(instance)
             // 依赖收集
-            setupRenderEffect(instance, n2, container)
+            setupRenderEffect(instance, initialVNode, container)
         }
+
         // 组件更新 
         function updateComponent() {
             // 更新逻辑咱暂时不看
         }
-        // 组件类型的处理，里面包含mount和update 
-        function processComponent(n1, n2, container) {
-            if (n1 == null) {
-                mountComponent(n2, container)
-            } else {
-                updateComponent()
+        // render 组件的初始化主要就是执行path
+        function createApp(rootComponent, rootProps = null) {
+            // 这里我们直接传值，源码中是根据type 去判断的
+            const vnode = createVNode(rootComponent, rootProps, null, 4)
+            const mount = (container) => {
+                if (typeof container === 'string') {
+                    container = document.querySelector(container)
+                }
+                patch(null, vnode, container)
             }
+            return { mount }
 
         }
-        // render 组件的初始化主要就是执行path
-        function render(rootComponent, rootProps = null) {
-            const vnode = createVNode(
-                rootComponent,
-                rootProps
-            )
-            path(null, vnode, 'app')
-        }
-        render({
+        // 初始化
+        createApp({
             setup() {
                 const num = Vue.ref(1)
                 console.log(num)
@@ -299,11 +348,11 @@
             },
             render(_ctx) {
                 with (_ctx) {
-                    return createVnode("div", { onClick: handleClick }, double)
+                    return createVNode("div", { onClick: handleClick }, double)
                 }
 
             }
-        })
+        }).mount('#app')
     </script>
 </body>
 

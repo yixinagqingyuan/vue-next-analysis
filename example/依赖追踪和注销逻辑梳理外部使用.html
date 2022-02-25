@@ -13,6 +13,7 @@
         依赖追踪和注销逻辑梳理
     </h1>
     <div>
+
         依赖追踪的api <a href="https://v3.cn.vuejs.org/api/effect-scope.html#effectscope">effectScope</a> 其实已经被暴露出来供用户使用
     </div>
     <div>
@@ -106,7 +107,13 @@
             recordEffectScope(val.effect)
             return val
         }
-
+        const ref = Vue.ref
+        Vue.ref = function (val) {
+            const newRef = computed(val)
+            // 模拟拿到effect
+            recordEffectScope(val.effect)
+            return newRef
+        }
         function effectScope() {
             return new EffectScope()
         }
