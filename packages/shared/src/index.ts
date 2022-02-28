@@ -88,7 +88,7 @@ export const isReservedProp = /*#__PURE__*/ makeMap(
   'onVnodeBeforeUpdate,onVnodeUpdated,' +
   'onVnodeBeforeUnmount,onVnodeUnmounted'
 )
-
+// 只在第一次处理，下次直接走缓存
 const cacheStringFunction = <T extends (str: string) => string>(fn: T): T => {
   const cache: Record<string, string> = Object.create(null)
   return ((str: string) => {

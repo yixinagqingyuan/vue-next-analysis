@@ -456,6 +456,8 @@ function createBaseVNode(
   } else if (children) {
     // compiled element vnode - if children is passed, only possible types are
     // string or Array.
+    // 如果他儿子是个文本节点那么说明他儿子就是个文本
+    // 执行按位或运算，结果从二进制转为十进制为9
     vnode.shapeFlag |= isString(children)
       ? ShapeFlags.TEXT_CHILDREN
       : ShapeFlags.ARRAY_CHILDREN
@@ -470,7 +472,7 @@ function createBaseVNode(
   if (
     isBlockTreeEnabled > 0 &&
     // avoid a block node from tracking itself
-    !isBlockNode && 
+    !isBlockNode &&
     // has current parent block
     //具有当前父块
     currentBlock &&

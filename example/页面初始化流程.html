@@ -93,6 +93,32 @@
             createElement: (tag) => {
                 return document.createElement(tag)
             },
+            setElementText: (el, text) => {
+                el.textContent = text
+            },
+        }
+        // 这里我们只考虑 事件patch 的情况，其他暂不处理
+        function patchEvent(el, key, val) {
+            el.addEventListener(key.slice(2).toLowerCase(), function () {
+                val()
+            })
+        }
+        // 处理props
+        function patchProp(el, key, val) {
+            patchEvent(el, key, val)
+        }
+        // 判断是不是ref
+        function isRef(r) {
+            return Boolean(r && r.__v_isRef === true)
+        }
+        // 返回正确的值
+        function unref(ref) {
+            return isRef(ref) ? ref.value : ref
+        }
+        const toDisplayString = (val) => {
+            return val == null
+                ? ''
+                : String(val)
         }
         const computed = Vue.computed
         Vue.computed = function (fn) {
@@ -145,7 +171,9 @@
         // 建立响应式
         function proxyRefs(objectWithRefs) {
             return new Proxy(objectWithRefs, {
-                get: (target, key, receiver) => Reflect.get(target, key, receiver),
+                get: (target, key, receiver) => {
+                    return unref(Reflect.get(target, key, receiver))
+                },
                 set: (target, key, value, receiver) => {
                     return Reflect.set(target, key, value, receiver)
                 }
@@ -188,18 +216,40 @@
             }
 
         }
+        const processText = (n1, n2, container, anchor) => {
+            if (n1 == null) {
+                nodeOps.insert(
+                    (n2.el = createText(n2.children)),
+                    container
+                )
+            }
+        }
         // 节点初始化
-        function mountElement(n2, container) {
-            let el = nodeOps.createElement(n2.type)
+        function mountElement(n2, container, parentComponent) {
+            const { type, props, children, shapeFlag } = n2
+            let el = nodeOps.createElement(type)
+
+            // 判断出来带文本子节点的内容
+            if (n2.shapeFlag === 9) {
+                nodeOps.setElementText(el, children)
+            }
+            // 如果有props 的情况
+            if (props) {
+                for (key in props) {
+                    // 注意这里只处理事件的情况，暂不处理样式等情况
+                    patchProp(el, key, props[key])
+                }
+            }
             nodeOps.insert(el, container)
         }
         // 节点类型的处理
-        function processElement(n1, n2, container) {
+        function processElement(n1, n2, container, parentComponent) {
             if (n1 == null) {
                 // 如果第一次没有，那么就是走mountelement的类型
                 mountElement(
                     n2,
-                    container
+                    container,
+                    parentComponent
                 )
             } else {
                 // 接下来就是组件更新，走的是patch的内容，内部包含diff，也就是最核心的内容
@@ -211,6 +261,9 @@
         }
         //创建vnode  
         function createVNode(type, props, children, shapeFlag = 1) {
+            if (typeof children === "string") {
+                shapeFlag = 9
+            }
             const vnode = {
                 type,
                 props,
@@ -218,20 +271,23 @@
                 shapeFlag,
                 component: null,
             }
+
             return vnode
         }
         // patch 包含各种组件，节点，注释等内容的挂载，这里为了分析依赖追踪，我们只分析组件的挂载
-        function patch(n1, n2, container) {
+        function patch(n1, n2, container, parentComponent = null) {
             // 如果相等就返回表示没变
             if (n1 === n2) {
                 return
             }
             const { type, shapeFlag } = n2
             switch (type) {
+
                 // 前面逻辑省略，我们只处理组件类型和普通节点类型
+
                 default:
                     if (shapeFlag & 1) {
-                        processElement(n1, n2, container)
+                        processElement(n1, n2, container, parentComponent)
                     } else {
                         processComponent(n1, n2, container)
                     }
@@ -269,6 +325,7 @@
                 render,
                 setupState,
             } = instance
+            debugger
             result = render.call(
                 setupState,
                 setupState,
@@ -286,6 +343,7 @@
                     prevTree,
                     nextTree,
                     container,
+                    instance
                 )
             }
             // 这里直接调用内部的ReactiveEffect即可不用自己重写
@@ -342,13 +400,14 @@
                     num.value++
                 }
                 return {
+                    num,
                     double,
                     handleClick
                 }
             },
             render(_ctx) {
                 with (_ctx) {
-                    return createVNode("div", { onClick: handleClick }, double)
+                    return createVNode("div", { onClick: handleClick }, toDisplayString(double))
                 }
 
             }

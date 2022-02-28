@@ -666,6 +666,7 @@ function baseCreateRenderer(
 
       // mount children first, since some props may rely on child content
       // being already rendered, e.g. `<select value>`
+      // 如果子节点是个文本节点，直接给挂到当前节点上去
       if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
         hostSetElementText(el, vnode.children as string)
       } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {

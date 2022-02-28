@@ -100,6 +100,7 @@
         //1、 在外部使用
         // 由于源码中recordEffectScope 被保存在vue 的对象中无法获取
         //为了能模拟源码中调用recordEffectScope 方法重写 computed 
+        // 2、挡在内部使用时，其实就是收集了组件的依赖，从而能达到在卸载时，统一执行scope.stop统一卸载当前组件的的依赖的所有effect
         const computed = Vue.computed
         Vue.computed = function (fn) {
             const val = computed(fn)
