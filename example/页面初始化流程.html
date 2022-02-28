@@ -10,21 +10,8 @@
 
 <body>
     <h1>
-        依赖追踪和注销逻辑梳理
+        页面初始化逻辑梳理
     </h1>
-    <div>
-        依赖追踪的api <a href="https://v3.cn.vuejs.org/api/effect-scope.html#effectscope">effectScope</a> 其实已经被暴露出来供用户使用
-    </div>
-    <div>
-        这个api的本质就是为了更方便的管理副作用的收集和销毁。在源码内部使用的也是当前api
-    </div>
-    <div>
-        为什么要有effectScope？
-    </div>
-    <div>
-        具体请看vuerfc 的 <a
-            href="https://github.com/vuejs/rfcs/blob/master/active-rfcs/0041-reactivity-effect-scope.md"></a> rc
-    </div>
     <div id="app"></div>
     <script src="../packages/vue/dist/vue.global.js"></script>
     <script>
