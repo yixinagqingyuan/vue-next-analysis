@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        // 测试set的引用类型
+        // 经过测试，之所以反向塞到肚子里是由于为了在更新的时候给去删除多余无用的effect 
+        const set = new Set()
+        set.add(1)
+        console.log(set)
+        const a = {
+            deps: [set]
+        }
+        console.log(a)
+        const { deps } = a
+        console.log(deps)
+        deps[0].remover(1)
+        console.log(set)
+    </script>
+</body>
+
+</html>

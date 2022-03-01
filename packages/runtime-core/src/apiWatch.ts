@@ -52,14 +52,14 @@ export type WatchCallback<V = any, OV = any> = (
 
 type MapSources<T, Immediate> = {
   [K in keyof T]: T[K] extends WatchSource<infer V>
-    ? Immediate extends true
-      ? V | undefined
-      : V
-    : T[K] extends object
-    ? Immediate extends true
-      ? T[K] | undefined
-      : T[K]
-    : never
+  ? Immediate extends true
+  ? V | undefined
+  : V
+  : T[K] extends object
+  ? Immediate extends true
+  ? T[K] | undefined
+  : T[K]
+  : never
 }
 
 type InvalidateCbRegistrator = (cb: () => void) => void
@@ -162,8 +162,8 @@ export function watch<T = any, Immediate extends Readonly<boolean> = false>(
   if (__DEV__ && !isFunction(cb)) {
     warn(
       `\`watch(fn, options?)\` signature has been moved to a separate API. ` +
-        `Use \`watchEffect(fn, options?)\` instead. \`watch\` now only ` +
-        `supports \`watch(source, cb, options?) signature.`
+      `Use \`watchEffect(fn, options?)\` instead. \`watch\` now only ` +
+      `supports \`watch(source, cb, options?) signature.`
     )
   }
   return doWatch(source as any, cb, options)
@@ -178,13 +178,13 @@ function doWatch(
     if (immediate !== undefined) {
       warn(
         `watch() "immediate" option is only respected when using the ` +
-          `watch(source, callback, options?) signature.`
+        `watch(source, callback, options?) signature.`
       )
     }
     if (deep !== undefined) {
       warn(
         `watch() "deep" option is only respected when using the ` +
-          `watch(source, callback, options?) signature.`
+        `watch(source, callback, options?) signature.`
       )
     }
   }
@@ -194,7 +194,7 @@ function doWatch(
       `Invalid watch source: `,
       s,
       `A watch source can only be a getter/effect function, a ref, ` +
-        `a reactive object, or an array of these types.`
+      `a reactive object, or an array of these types.`
     )
   }
 
@@ -308,8 +308,8 @@ function doWatch(
         forceTrigger ||
         (isMultiSource
           ? (newValue as any[]).some((v, i) =>
-              hasChanged(v, (oldValue as any[])[i])
-            )
+            hasChanged(v, (oldValue as any[])[i])
+          )
           : hasChanged(newValue, oldValue)) ||
         (__COMPAT__ &&
           isArray(newValue) &&

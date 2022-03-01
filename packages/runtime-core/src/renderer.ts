@@ -2299,6 +2299,7 @@ function baseCreateRenderer(
     }
 
     // stop effects in component scope
+    // 卸载依赖
     scope.stop()
 
     // update may be null if a component is unmounted before its async
@@ -2328,6 +2329,9 @@ function baseCreateRenderer(
     // A component with async dep inside a pending suspense is unmounted before
     // its async dep resolves. This should remove the dep from the suspense, and
     // cause the suspense to resolve immediately if that was the last dep.
+    //在挂起暂挂中包含async dep的组件在挂起之前卸载
+    //它的异步dep解析。这将从悬念中消除dep，并且
+    //如果这是最后一次dep，立即解决悬念。
     if (
       __FEATURE_SUSPENSE__ &&
       parentSuspense &&
@@ -2342,7 +2346,7 @@ function baseCreateRenderer(
         parentSuspense.resolve()
       }
     }
-
+    // dev 环境暂时不看
     if (__DEV__ || __FEATURE_PROD_DEVTOOLS__) {
       devtoolsComponentRemoved(instance)
     }

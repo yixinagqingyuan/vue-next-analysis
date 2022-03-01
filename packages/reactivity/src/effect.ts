@@ -18,9 +18,9 @@ type KeyToDepMap = Map<any, Dep>
 const targetMap = new WeakMap<any, KeyToDepMap>()
 
 // The number of effects currently being tracked recursively.
-//当前递归跟踪的效果数。
+//当前递归跟踪的效果数。effectTrackDepth 表示递归嵌套执行 effect 函数的深度
 let effectTrackDepth = 0
-
+//trackOpBit 用于标识依赖收集的状态
 export let trackOpBit = 1
 
 /**
@@ -33,6 +33,7 @@ export let trackOpBit = 1
 *选择此值是为了使现代JS引擎能够在所有平台上使用SMI。
 *当递归深度更大时，返回到使用完全清理。
 */
+//maxMarkerBits 表示最大标记的位数。
 const maxMarkerBits = 30
 
 export type EffectScheduler = (...args: any[]) => any
@@ -200,8 +201,11 @@ export function track(target: object, type: TrackOpTypes, key: unknown) {
   if (!depsMap) {
     targetMap.set(target, (depsMap = new Map()))
   }
+  // 这个dep 是当变量的小管家
   let dep = depsMap.get(key)
+  //如果没拿到那么就创建一个新的dep
   if (!dep) {
+    // 用createDep创建 
     depsMap.set(key, (dep = createDep()))
   }
 
@@ -215,9 +219,9 @@ export function track(target: object, type: TrackOpTypes, key: unknown) {
 export function isTracking() {
   return shouldTrack && activeEffect !== undefined
 }
-
+// 这一块就是依赖收集的地方
 export function trackEffects(
-  dep: Dep,
+  dep: Dep,// 小管家
   debuggerEventExtraInfo?: DebuggerEventExtraInfo
 ) {
   let shouldTrack = false
@@ -234,6 +238,7 @@ export function trackEffects(
   // 如果有，就表示应该追踪
   if (shouldTrack) {
     //搜集依赖放到小管家里面
+    //activeEffect 相当于vue2里面的watcher
     dep.add(activeEffect!)
     // 反向放一个，建立关系
     // 之所以这样是为了在当前的activeeffect计算完成之后，能够清理没有被用的到dep
@@ -347,6 +352,7 @@ export function triggerEffects(
   // spread into array for stabilization
   for (const effect of isArray(dep) ? dep : [...dep]) {
     if (effect !== activeEffect || effect.allowRecurse) {
+    // 开发环境暂不考虑
       if (__DEV__ && effect.onTrigger) {
         effect.onTrigger(extend({ effect }, debuggerEventExtraInfo))
       }

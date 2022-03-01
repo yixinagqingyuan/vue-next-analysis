@@ -1,7 +1,7 @@
 <script src="../../dist/vue.global.js"></script>
 
 <div id="demo">
-  <div class="currentBranchS">
+  <!-- <div class="currentBranchS">
     11111
   </div>
   <div @click="handleClick">
@@ -12,7 +12,15 @@
   </div>
   <div @click="handleClick">
     {{double}}
+  </div> -->
+  <div @click="handle">
+    点击切换
   </div>
+  <div @click="handle1">
+    点击切换1
+  </div>
+  <div v-if="falg">{{num}}</div>
+  <div v-else>{{num1}}</div>
 </div>
 
 <script>
@@ -30,7 +38,6 @@
   // console.log(a)
   // 处理该作用域内的所有 effect
   // scope.stop()∫
-  debugger
   Vue.createApp({
     data: () => ({
       branches: ['master', 'sync'],
@@ -39,6 +46,8 @@
     }),
     setup() {
       const num = Vue.ref(1)
+      const num1 = Vue.ref(2)
+      const falg = Vue.ref(false)
       console.log(num)
       const double = Vue.computed(() => {
         console.log(1111)
@@ -49,8 +58,20 @@
 
         num.value++
       }
+      function handle() {
+        // debugger
+        falg.value = false
+      }
+      function handle1() {
+        falg.value = true
+      }
       return {
+        num,
+        num1,
+        falg,
         double,
+        handle,
+        handle1,
         handleClick
       }
     },
