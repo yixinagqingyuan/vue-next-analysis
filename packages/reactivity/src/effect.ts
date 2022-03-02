@@ -59,6 +59,7 @@ export const MAP_KEY_ITERATE_KEY = Symbol(__DEV__ ? 'Map key iterate' : '')
 
 export class ReactiveEffect<T = any> {
   active = true
+  // effect 存储相关的 deps 依赖
   deps: Dep[] = []
 
   // can be attached after creation
@@ -75,6 +76,7 @@ export class ReactiveEffect<T = any> {
     public scheduler: EffectScheduler | null = null,
     scope?: EffectScope | null
   ) {
+    // effectScope 相关处理逻辑
     recordEffectScope(this, scope)
   }
 
@@ -85,12 +87,16 @@ export class ReactiveEffect<T = any> {
     // 首先会依赖收集
     if (!effectStack.includes(this)) {
       try {
+        // 压栈
         effectStack.push((activeEffect = this))
         enableTracking()
-
+        // 根据递归的深度记录位数
+        // 前++ 会返回新值
         trackOpBit = 1 << ++effectTrackDepth
-
+        // 超过 maxMarkerBits 则 trackOpBit 的计算会超过最大整形的位数，降级为 cleanupEffect
+        // 最大是三十个
         if (effectTrackDepth <= maxMarkerBits) {
+          // 给依赖打标记
           initDepMarkers(this)
         } else {
           cleanupEffect(this)
@@ -99,14 +105,17 @@ export class ReactiveEffect<T = any> {
         return this.fn()
       } finally {
         if (effectTrackDepth <= maxMarkerBits) {
+          // 完成依赖标记
           finalizeDepMarkers(this)
         }
-
+        // 恢复到上一级
         trackOpBit = 1 << --effectTrackDepth
 
         resetTracking()
+        // 出栈
         effectStack.pop()
         const n = effectStack.length
+        // 指向栈最后一个 effect
         activeEffect = n > 0 ? effectStack[n - 1] : undefined
       }
     }
@@ -199,6 +208,7 @@ export function track(target: object, type: TrackOpTypes, key: unknown) {
   }
   let depsMap = targetMap.get(target)
   if (!depsMap) {
+    // 每个 target 对应一个 depsMap
     targetMap.set(target, (depsMap = new Map()))
   }
   // 这个dep 是当变量的小管家
@@ -206,6 +216,7 @@ export function track(target: object, type: TrackOpTypes, key: unknown) {
   //如果没拿到那么就创建一个新的dep
   if (!dep) {
     // 用createDep创建 
+    // 每个 key 对应一个 dep 集合
     depsMap.set(key, (dep = createDep()))
   }
 
@@ -227,22 +238,27 @@ export function trackEffects(
   let shouldTrack = false
   if (effectTrackDepth <= maxMarkerBits) {
     if (!newTracked(dep)) {
-      dep.n |= trackOpBit // set newly tracked
+      // 标记为新依赖
+      dep.n |= trackOpBit // set newly tracked重新追踪
       shouldTrack = !wasTracked(dep)
     }
   } else {
     // Full cleanup mode.
     // 判断当前小管家里面有没有，如果有了那么就是false 如果没有就是trues
+    // cleanup 模式
     shouldTrack = !dep.has(activeEffect!)
   }
   // 如果有，就表示应该追踪
+
   if (shouldTrack) {
     //搜集依赖放到小管家里面
     //activeEffect 相当于vue2里面的watcher
+    // 收集当前激活的 effect 作为依赖
     dep.add(activeEffect!)
     // 反向放一个，建立关系
     // 之所以这样是为了在当前的activeeffect计算完成之后，能够清理没有被用的到dep
     // dep 和 activeEffect 是多对多的关系
+    // 当前激活的 effect 收集 dep 集合作为依赖
     activeEffect!.deps.push(dep)
     //dev 环境暂时不看
     if (__DEV__ && activeEffect!.onTrack) {
@@ -352,7 +368,7 @@ export function triggerEffects(
   // spread into array for stabilization
   for (const effect of isArray(dep) ? dep : [...dep]) {
     if (effect !== activeEffect || effect.allowRecurse) {
-    // 开发环境暂不考虑
+      // 开发环境暂不考虑
       if (__DEV__ && effect.onTrigger) {
         effect.onTrigger(extend({ effect }, debuggerEventExtraInfo))
       }
