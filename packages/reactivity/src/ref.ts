@@ -36,6 +36,7 @@ export function trackRefValue(ref: RefBase<any>) {
       // 在effect 中已经声明默认为空值，如果没有俺么就在创建一个
       ref.dep = createDep()
     }
+    // dev 不看
     if (__DEV__) {
       trackEffects(ref.dep, {
         target: ref,
@@ -49,7 +50,7 @@ export function trackRefValue(ref: RefBase<any>) {
   }
 }
 
-export function  triggerRefValue(ref: RefBase<any>, newVal?: any) {
+export function triggerRefValue(ref: RefBase<any>, newVal?: any) {
   ref = toRaw(ref)
   if (ref.dep) {
     if (__DEV__) {

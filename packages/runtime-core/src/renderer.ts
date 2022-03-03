@@ -1635,7 +1635,7 @@ function baseCreateRenderer(
       // @ts-ignore (for scheduler)
       update.ownerInstance = instance
     }
-
+    //先执行一次 也就是执行componentUpdateFn =>  执行render 函数 
     update()
   }
 

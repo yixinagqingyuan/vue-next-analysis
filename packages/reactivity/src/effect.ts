@@ -82,6 +82,7 @@ export class ReactiveEffect<T = any> {
 
   run() {
     if (!this.active) {
+      // 执行componentUpdateFn
       return this.fn()
     }
     // 首先会依赖收集
@@ -92,6 +93,7 @@ export class ReactiveEffect<T = any> {
         enableTracking()
         // 根据递归的深度记录位数
         // 前++ 会返回新值
+        // 位运算 左移
         trackOpBit = 1 << ++effectTrackDepth
         // 超过 maxMarkerBits 则 trackOpBit 的计算会超过最大整形的位数，降级为 cleanupEffect
         // 最大是三十个
@@ -239,8 +241,8 @@ export function trackEffects(
   if (effectTrackDepth <= maxMarkerBits) {
     if (!newTracked(dep)) {
       // 标记为新依赖
-      dep.n |= trackOpBit // set newly tracked重新追踪
-      shouldTrack = !wasTracked(dep)
+      dep.n |= trackOpBit // set newly tracked重新追踪 |= 有一个为1 那么就是1
+      shouldTrack = !wasTracked(dep) // 如果是true 表示没有被收集过，可以收集了，如果为false 表示被收集过
     }
   } else {
     // Full cleanup mode.

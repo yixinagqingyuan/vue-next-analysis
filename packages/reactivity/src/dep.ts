@@ -29,7 +29,8 @@ export const createDep = (effects?: ReactiveEffect[]): Dep => {
 //判断是否以前被收集过
 export const wasTracked = (dep: Dep): boolean => (dep.w & trackOpBit) > 0
 //判断是否是重新收集
-export const newTracked = (dep: Dep): boolean => (dep.n & trackOpBit) > 0
+// 如果大于0 的情况，表示 dep.n和trackopbit 的位数重了
+export const newTracked = (dep: Dep): boolean => (dep.n & trackOpBit) > 0 // 如果任意一个位是0 则结果就是0。
 
 export const initDepMarkers = ({ deps }: ReactiveEffect) => {
   if (deps.length) {
