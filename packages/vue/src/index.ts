@@ -50,6 +50,7 @@ function compileToFunction(
     // Reason: potential execution of JS expressions in in-DOM template.
     // The user must make sure the in-DOM template is trusted. If it's rendered
     // by the server, the template should not contain any user data.
+    //
     template = el ? el.innerHTML : ``
   }
 

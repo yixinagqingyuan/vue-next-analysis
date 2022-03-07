@@ -641,6 +641,7 @@ function baseCreateRenderer(
     let el: RendererElement
     let vnodeHook: VNodeHook | undefined | null
     const { type, props, shapeFlag, transition, patchFlag, dirs } = vnode
+    //dev 情况暂时不看
     if (
       !__DEV__ &&
       vnode.el &&
@@ -657,6 +658,7 @@ function baseCreateRenderer(
       //因为克隆树不能被HMR更新，所以只能在生产中这样做。
       el = vnode.el = hostCloneNode(vnode.el)
     } else {
+      // 创建节点
       el = vnode.el = hostCreateElement(
         vnode.type as string,
         isSVG,
@@ -794,7 +796,7 @@ function baseCreateRenderer(
       }
     }
   }
-
+  // 子vnode 初始化
   const mountChildren: MountChildrenFn = (
     children,
     container,
@@ -823,7 +825,7 @@ function baseCreateRenderer(
       )
     }
   }
-
+  // 节点patch
   const patchElement = (
     n1: VNode,
     n2: VNode,
@@ -833,16 +835,21 @@ function baseCreateRenderer(
     slotScopeIds: string[] | null,
     optimized: boolean
   ) => {
+    // vnode1.el 肯定不为空，现将他赋值给vnode2.el 此时vnode2还是虚拟mod 
     const el = (n2.el = n1.el!)
     let { patchFlag, dynamicChildren, dirs } = n2
     // #1426 take the old vnode's patch flag into account since user may clone a
     // compiler-generated vnode, which de-opts to FULL_PROPS
-    patchFlag |= n1.patchFlag & PatchFlags.FULL_PROPS
+    //#1426考虑旧vnode的补丁标志，因为用户可能会克隆
+    //编译器生成的vnode，它选择完整的_道具
+    // 具有动态key属性，当key改变时，需要进行完整的diff
+    //先&同位必须都是1则为1 如果最后结果为1则表示已经确定了patchFlag 类型 |= 给n1和n2 都给做一个位的标记
+    patchFlag |= n1.patchFlag & PatchFlags.FULL_PROPS // |= 有一个为1 那么就是1 & 一个为0 都为0
     const oldProps = n1.props || EMPTY_OBJ
     const newProps = n2.props || EMPTY_OBJ
     let vnodeHook: VNodeHook | undefined | null
-
     // disable recurse in beforeUpdate hooks
+    //在beforeUpdate钩子中禁用递归
     parentComponent && toggleRecurse(parentComponent, false)
     if ((vnodeHook = newProps.onVnodeBeforeUpdate)) {
       invokeVNodeHook(vnodeHook, parentComponent, n2, n1)
@@ -971,6 +978,7 @@ function baseCreateRenderer(
     }
 
     if ((vnodeHook = newProps.onVnodeUpdated) || dirs) {
+      //组件的各个周期函数()的 hooks 执行
       queuePostRenderEffect(() => {
         vnodeHook && invokeVNodeHook(vnodeHook, parentComponent, n2, n1)
         dirs && invokeDirectiveHook(n2, n1, parentComponent, 'updated')

@@ -20,8 +20,9 @@ export const enum PatchFlags {
   /**
    * Indicates an element with dynamic textContent (children fast path)
    */
+  // 动态文本节点
   TEXT = 1,
-
+  // 2 动态class
   /**
    * Indicates an element with dynamic class binding.
    */
@@ -38,6 +39,7 @@ export const enum PatchFlags {
    * render() { return e('div', { style }) }
    * ```
    */
+  // 4 动态style
   STYLE = 1 << 2,
 
   /**
@@ -47,6 +49,7 @@ export const enum PatchFlags {
    * array that contains the keys of the props that may change so the runtime
    * can diff them faster (without having to worry about removed props)
    */
+  // 动态props
   PROPS = 1 << 3,
 
   /**
@@ -54,27 +57,37 @@ export const enum PatchFlags {
    * diff is always needed to remove the old key. This flag is mutually
    * exclusive with CLASS, STYLE and PROPS.
    */
+  /**
+*指示带有带有动态关键点的道具的元素。当钥匙更换时，一个完整的
+*总是需要diff来移除旧密钥。这面旗是相互的
+*独家与阶级，风格和道具。
+*/
+  // 具有动态key属性，当key改变时，需要进行完整的diff
   FULL_PROPS = 1 << 4,
 
   /**
    * Indicates an element with event listeners (which need to be attached
    * during hydration)
    */
+  // 32 带有监听事件的节点
   HYDRATE_EVENTS = 1 << 5,
 
   /**
    * Indicates a fragment whose children order doesn't change.
    */
+  // 64 一个不会改变子节点顺序的fragment
   STABLE_FRAGMENT = 1 << 6,
 
   /**
    * Indicates a fragment with keyed or partially keyed children
    */
+  // 128 带有key的fragment
   KEYED_FRAGMENT = 1 << 7,
 
   /**
    * Indicates a fragment with unkeyed children.
    */
+  // 256 没有key的fragment
   UNKEYED_FRAGMENT = 1 << 8,
 
   /**
@@ -83,6 +96,7 @@ export const enum PatchFlags {
    * and onVnodeXXX hooks, it simply marks the vnode so that a parent block
    * will track it.
    */
+  // 512 一个子节点只会进行非props比较
   NEED_PATCH = 1 << 9,
 
   /**
@@ -90,6 +104,7 @@ export const enum PatchFlags {
    * iterated value, or dynamic slot names).
    * Components with this flag are always force updated.
    */
+  // 1024 动态插槽
   DYNAMIC_SLOTS = 1 << 10,
 
   /**
@@ -97,6 +112,9 @@ export const enum PatchFlags {
    * comments at the root level of a template. This is a dev-only flag since
    * comments are stripped in production.
    */
+
+  // 下面是特殊的,即在diff阶段会被跳过的
+  // 2048 表示仅因为用户在模板的根级别放置注释而创建的片段，这是一个仅用于开发的标志，因为注释在生产中被剥离
   DEV_ROOT_FRAGMENT = 1 << 11,
 
   /**
@@ -111,6 +129,7 @@ export const enum PatchFlags {
    * Indicates a hoisted static vnode. This is a hint for hydration to skip
    * the entire sub tree since static content never needs to be updated.
    */
+  // 静态节点，它的内容永远不会改变，不需要进行diff
   HOISTED = -1,
   /**
    * A special flag that indicates that the diffing algorithm should bail out
@@ -119,6 +138,7 @@ export const enum PatchFlags {
    * render functions, which should always be fully diffed)
    * OR manually cloneVNodes
    */
+  // 用来表示一个节点的diff应该结束
   BAIL = -2
 }
 

@@ -26,15 +26,16 @@ export const createDep = (effects?: ReactiveEffect[]): Dep => {
   dep.n = 0
   return dep
 }
+// 如果大于0 的情况，表示 dep.n或者dep.w和trackopbit 的位数重了,否则就是位数没重，位数重了表示
 //判断是否以前被收集过
-export const wasTracked = (dep: Dep): boolean => (dep.w & trackOpBit) > 0
+export const wasTracked = (dep: Dep): boolean => (dep.w & trackOpBit) > 0// 如果任意一个位是0 则结果就是0。
 //判断是否是重新收集
-// 如果大于0 的情况，表示 dep.n和trackopbit 的位数重了
 export const newTracked = (dep: Dep): boolean => (dep.n & trackOpBit) > 0 // 如果任意一个位是0 则结果就是0。
 
 export const initDepMarkers = ({ deps }: ReactiveEffect) => {
   if (deps.length) {
     for (let i = 0; i < deps.length; i++) {
+      // 组件更新的时候重新给已经收集的组件打标签，后期用来判断是不是已经被收集过了
       deps[i].w |= trackOpBit // set was tracked 标记依赖已经被收集
     }
   }

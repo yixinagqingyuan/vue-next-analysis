@@ -240,7 +240,7 @@ export function trackEffects(
   let shouldTrack = false
   if (effectTrackDepth <= maxMarkerBits) {
     //判断是否是重新收集 如果为true 就表示需要重新收集
-    // 如果为false 就不需要重新手机
+    // 如果为false 就不需要重新收集
     if (!newTracked(dep)) {
       // 标记为新依赖
       dep.n |= trackOpBit // set newly tracked重新追踪 |= 有一个为1 那么就是1

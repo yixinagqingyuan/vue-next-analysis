@@ -12,3 +12,4 @@
 - [x] [细说 Vue.js 3.2 关于响应式部分的优化](https://juejin.cn/post/6995732683435278344)
 - [x] [vue3.0 响应式原理(超详细)](https://juejin.cn/post/6858899262596448270#heading-38) 
 - [x] [位运算符在JS中的妙用](https://juejin.cn/post/6844903568906911752) 
+- [x] [Vue3 功能拆解② Scheduler 渲染机制](https://www.cheng92.com/vue/vue-teardown-2-sheduler/)
