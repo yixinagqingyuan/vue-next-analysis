@@ -11,7 +11,7 @@ export const enum ShapeFlags {
   FUNCTIONAL_COMPONENT = 1 << 1,//2 // 函数组件
   STATEFUL_COMPONENT = 1 << 2,//4 // 普通组件
   TEXT_CHILDREN = 1 << 3,//8 // 文本子节点
-  ARRAY_CHILDREN = 1 << 4,//16
+  ARRAY_CHILDREN = 1 << 4,//16 // 数组子节点
   SLOTS_CHILDREN = 1 << 5,//32
   TELEPORT = 1 << 6,//64 // 传送门
   SUSPENSE = 1 << 7,//128 // 可以在组件中异步

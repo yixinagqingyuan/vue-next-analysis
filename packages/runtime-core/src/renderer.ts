@@ -1733,6 +1733,8 @@ function baseCreateRenderer(
         //上一个孩子是数组
         if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
           // two arrays, cannot assume anything, do full diff
+          //两个数组，不能做任何假设，完全不同
+          // 子节点的全量patch
           patchKeyedChildren(
             c1 as VNode[],
             c2 as VNodeArrayChildren,
@@ -1751,10 +1753,12 @@ function baseCreateRenderer(
       } else {
         // prev children was text OR null
         // new children is array OR null
+        // 是个新增节点并且是个文本节点 直接插入
         if (prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
           hostSetElementText(container, '')
         }
         // mount new if array
+        // 最后一种情况  是个新增节点，并且是个数组节点
         if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
           mountChildren(
             c2 as VNodeArrayChildren,
