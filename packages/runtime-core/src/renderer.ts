@@ -1717,8 +1717,10 @@ function baseCreateRenderer(
     }
 
     // children has 3 possibilities: text, array or no children.
+    //children有三种可能：文本、数组或无子对象。
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
       // text children fast path
+      // 数组的情况
       if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
         unmountChildren(c1 as VNode[], parentComponent, parentSuspense)
       }
@@ -1728,6 +1730,7 @@ function baseCreateRenderer(
     } else {
       if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
         // prev children was array
+        //上一个孩子是数组
         if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
           // two arrays, cannot assume anything, do full diff
           patchKeyedChildren(

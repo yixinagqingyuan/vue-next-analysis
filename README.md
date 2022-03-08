@@ -3,9 +3,9 @@
 - [x] [block主逻辑解析](example/block主逻辑梳理.html)
 - [x] [runtime和完整版本的实现梳理](example/block主逻辑梳理.html)
 - [x] [依赖追踪和注销逻辑梳理](example/依赖追踪和注销逻辑梳理外部使用.html)
-- [x] [依赖追踪和注销逻辑梳理](example/页面初始化流程.html)
-
-
+- [x] [页面初始化流程](example/页面初始化流程.html)
+- [x] [依赖收集的一些技巧](example/依赖收集的一些技巧.html)
+- [x] [从ref入手理解响应式原理](example/从ref入手理解响应式原理.html)
 
 # 一些辅助理解文章
 

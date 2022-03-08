@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        // 保存临时依赖函数用于包装
+        const effectStack = [];
+
+        // 依赖关系的map对象只能接受对象
+        let targetMap = new WeakMap();
+        // 判断是不是对象
+        const isObject = (val) => val !== null && typeof val === 'object';
+        // ref的函数
+        function ref(val) {
+            // 此处源码中为了保持一致，在对象情况下也做了用value 访问的情况value->proxy对象
+            // 我们在对象情况下就不在使用value 访问
+            return isObject(val) ? reactive(val) : new refObj(val);
+        }
+
+        //创建响应式对象
+        class refObj {
+            constructor(val) {
+                this._value = val;
+            }
+            get value() {
+                // 在第一次执行之后触发get来收集依赖
+                track(this, 'value');
+                return this._value;
+            }
+            set value(newVal) {
+                console.log(newVal);
+                this._value = newVal;
+                trigger(this, 'value');
+            }
+        };
+
+        // 对象的响应式处理 在这里我们为了理解原理原理暂时不考虑对象里嵌套对象的情况
+        // 其实对象的响应式处理也就是重复执行reactive 
+        function reactive(target) {
+            return new Proxy(target, {
+                get(target, key, receiver) {
+                    // Reflect用于执行对象默认操作，更规范、函数式
+                    // Proxy和Object的方法Reflect都有对应
+                    const res = Reflect.get(target, key, receiver);
+                    track(target, key);
+                    return res;
+                },
+                set(target, key, value, receiver) {
+                    const res = Reflect.set(target, key, value, receiver);
+                    trigger(target, key);
+                    return res;
+                },
+                deleteProperty(target, key) {
+                    const res = Reflect.deleteProperty(target, key);
+                    trigger(target, key);
+                    return res;
+                }
+            });
+        }
+
+        // 到此处，当前的ref 对象就已经实现了对数据改变的监听
+        const newRef = ref(0);
+        // 但是还是没有响应式的能力，那么他是怎样实现响应式的呢----依赖收集，触发更新=
+        // 用来做依赖收集 
+        // 在源码中为为了方法的通用性，他还传入了很多参数用于兼容不同情况
+        // 我们意在理解原理，只需要包装fn 即可
+        function effect(fn) {
+            // 包装当前依赖函数
+            const effect = function reactiveEffect() {
+                // 模拟源码中也加入错误处理，为了避免你瞎写出现错误的情况，这就是框架的高明之处
+                if (!effectStack.includes(effect)) {
+                    try {
+                        // 给当前函数放入临时栈中，为在下面执行中，触发get，在依赖收集中能找到当前变量的依赖项来建立关系
+                        effectStack.push(fn);
+                        // 执行当前函数，开始依赖收集了
+                        return fn();
+                    } finally {
+                        // 执行成功了出栈
+                        effectStack.pop();
+                    }
+                };
+            };
+
+            effect();
+        }
+        //  在收集的依赖中建立关系
+        function track(target, key) {
+            // 取出最后一个数据内容
+            const effect = effectStack[effectStack.length - 1];
+            // 如果当前变量有依赖
+            if (effect) {
+                //判断当前的map中是否有target
+                let depsMap = targetMap.get(target);
+                // 如果没有
+                if (!depsMap) {
+                    // new map存储当前weakmap
+                    depsMap = new Map();
+                    targetMap.set(target, depsMap);
+                }
+                // 获取key对应的响应函数集
+                let deps = depsMap.get(key);
+                if (!deps) {
+                    // 建立当前key 和依赖的关系，因为一个key 会有多个依赖
+                    // 为了防止重复依赖，使用set
+                    deps = new Set();
+                    depsMap.set(key, deps);
+                }
+                // 存入当前依赖
+                if (!deps.has(effect)) {
+                    deps.add(effect);
+                }
+            }
+        }
+        // 用于触发更新
+        function trigger(target, key) {
+            // 获取所有依赖内容
+            const depsMap = targetMap.get(target);
+            // 如果有依赖的话全部拉出来执行
+            if (depsMap) {
+                // 获取响应函数集合
+                const deps = depsMap.get(key);
+                if (deps) {
+                    // 执行所有响应函数 
+                    const run = (effect) => {
+                        // 源码中有异步调度任务，我们在这里省略
+                        effect();
+                    };
+                    deps.forEach(run);
+                }
+            }
+        }
+        effect(() => {
+            console.log(11111);
+            // 在自己实现的effect中，由于为了演示原理，没有做兼容，不能来触发set,否则会死循环
+            // vue源码中触发对effect中的做了兼容处理只会执行一次
+            newRef.value;
+        });
+
+        newRef.value++;
+
+
+    </script>
+</body>
+
+</html>
