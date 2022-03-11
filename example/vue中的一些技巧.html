@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        function createAppAPI(rootComponent, rootProps = null) {
+            const mount = (container) => {
+            }
+            return { mount }
+
+        }
+        function createRenderer() {
+            return {
+                createApp: createAppAPI()
+            }
+        }
+        function createApp(...args) {
+            const app = createRenderer().createApp(...args)
+            const { mount } = app
+            app.mount = () => {
+                console.log('执行自己的逻辑')
+                mount()
+            }
+        }
+    </script>
+</body>
+
+</html>

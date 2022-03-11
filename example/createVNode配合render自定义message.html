@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script src="../packages/vue/dist/vue.global.js"></script>
+    <script>
+        const { createVNode, render, ref } = Vue
+        const message = {
+            setup() {
+                const num = ref(1)
+                return {
+                    num
+                }
+            },
+            template: `<div>
+                        <div>{{num}}</div>
+                        <div>这是一个弹窗</div>
+                      </div>`
+        }
+        const vm = createVNode(message)
+        const container = document.createElement('div')
+        //通过patch 变成dom
+        render(vm, container)
+        document.body.appendChild(container.firstElementChild)
+    </script>
+
+</body>
+
+</html>

@@ -16,6 +16,6 @@ export const enum ShapeFlags {
   TELEPORT = 1 << 6,//64 // 传送门
   SUSPENSE = 1 << 7,//128 // 可以在组件中异步
   COMPONENT_SHOULD_KEEP_ALIVE = 1 << 8,//256
-  COMPONENT_KEPT_ALIVE = 1 << 9,//512
+  COMPONENT_KEPT_ALIVE = 1 << 9,//512// keepALIVE
   COMPONENT = ShapeFlags.STATEFUL_COMPONENT | ShapeFlags.FUNCTIONAL_COMPONENT // 6 表示函数组件和普通组件
 }

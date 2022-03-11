@@ -21,6 +21,9 @@
   </div>
   <div v-if="falg">{{num}}</div>
   <div v-else>{{num1}}</div>
+  <!-- <div v-for="i in 5" v-if="i==2">
+    {{i}}
+  </div> -->
 </div>
 
 <script>
@@ -105,8 +108,60 @@
   //   return 2, 3
   // }
   // console.log(ba())
+  // function setupRenderEffect(instance) {
+  //   const componentUpdateFn = () => {
+  //     //
+  //     const n2 = instance.render()
+  //     patch(null, n2)
+  //   }
+  //   // ReactiveEffect 依赖收集的核心
+  //   const effect = instance.effect = new ReactiveEffect(componentUpdateFn)
+  //   instance.update = effect
+  //   effect()
+  // }
+  // function mountComponent(n1, n2) {
+  //   // 组件初始化，包含响应式初始化，依赖收集，生命周期,编译等
+  //   setupComponent(instance)
+  //   //生成effect
+  //   setupRenderEffect()
+  // }
+  // // setup
+  // function setupComponent(instance) {
+  //   //编译逻通过compile 编译模板生成render 函数
+  //   instance.render = compile(template, finalCompilerOptions)
+  // }
+  // // 处理当前结果
+  // function handleSetupResult(instance, setupResult) {
+  //   instance.setupState = proxyRefs(setupResult)
+  //   finishComponentSetup(instance)
+  // }
+  // function setupStatefulComponent(instance) {
+  //   const { setup } = instance
+  //   const setupResult = setup()
+  //   function setupStatefulComponent(instance) {
+  //     handleSetupResult(instance, setupResult)
+  //   }
 
+  //   // 编译逻辑
+  //   function finishComponentSetup() {
 
+  //   }
+  //   function updateComponent(n1, n2) {
+  //     //组件更新逻辑
+  //   }
+  //   function processComponent(n1, n2) {
+  //     if (n1 === null) {
+  //       mountComponent(n1, n2)
+  //     } else {
+  //       updateComponent(n1, n2)
+  //     }
+  //   }
+
+  //   function patch(n1, n2) {
+  //     if (shapeFlag & ShapeFlags.COMPONENT) {
+  //       processComponent()
+  //     }
+  //   }
 </script>
 
 <style>

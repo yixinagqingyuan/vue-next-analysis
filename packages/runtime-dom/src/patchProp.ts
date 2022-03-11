@@ -20,7 +20,7 @@ export const patchProp: DOMRendererOptions['patchProp'] = (
   parentComponent,
   parentSuspense,
   unmountChildren
-) => { 
+) => {
   if (key === 'class') {
     patchClass(el, nextValue, isSVG)
   } else if (key === 'style') {
@@ -34,8 +34,8 @@ export const patchProp: DOMRendererOptions['patchProp'] = (
     key[0] === '.'
       ? ((key = key.slice(1)), true)
       : key[0] === '^'
-      ? ((key = key.slice(1)), false)
-      : shouldSetAsProp(el, key, nextValue, isSVG)
+        ? ((key = key.slice(1)), false)
+        : shouldSetAsProp(el, key, nextValue, isSVG)
   ) {
     patchDOMProp(
       el,
@@ -52,9 +52,9 @@ export const patchProp: DOMRendererOptions['patchProp'] = (
     // store value as dom properties since non-string values will be
     // stringified.
     if (key === 'true-value') {
-      ;(el as any)._trueValue = nextValue
+      ; (el as any)._trueValue = nextValue
     } else if (key === 'false-value') {
-      ;(el as any)._falseValue = nextValue
+      ; (el as any)._falseValue = nextValue
     }
     patchAttr(el, key, nextValue, isSVG, parentComponent)
   }

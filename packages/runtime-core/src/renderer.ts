@@ -1354,6 +1354,7 @@ function baseCreateRenderer(
         // double updating the same child component in the same flush.
         invalidateJob(instance.update)
         // instance.update is the reactive effect.
+        // 如果传入的props 有变化在执行更新
         instance.update()
       }
     } else {
@@ -1728,9 +1729,9 @@ function baseCreateRenderer(
         hostSetElementText(container, c2 as string)
       }
     } else {
+      //上一个孩子是数组
       if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
         // prev children was array
-        //上一个孩子是数组
         if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
           // two arrays, cannot assume anything, do full diff
           //两个数组，不能做任何假设，完全不同
