@@ -207,18 +207,6 @@ document.getElementById('app').innerHTML = html
 
 ```html
 <div id="demo">
-  <!-- <div class="currentBranchS">
-    11111
-  </div>
-  <div @click="handleClick">
-    {{currentBranch}}
-  </div>
-  <div v-for=" i in 5">
-    {{i}}
-  </div>
-  <div @click="handleClick">
-    {{double}}
-  </div> -->
   <div @click="handle">
     点击切换
   </div>
@@ -346,7 +334,9 @@ const home={
 
 ```html
 <template>
-  <div><home></home></div>
+  <div>
+    <home></home>
+    </div>
 </template>
 ```
 
