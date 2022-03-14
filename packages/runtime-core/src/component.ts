@@ -663,6 +663,7 @@ function setupStatefulComponent(
     // 将当前实例存入到了数组中可能为了effectScope
     setCurrentInstance(instance)
     //  暂时没研究明白干嘛 
+    // 暂停依赖收集
     pauseTracking()
     // 拿到执行结果
     // callWithErrorHandling 方法是为了兼容处理,加入try catch 防止报错
