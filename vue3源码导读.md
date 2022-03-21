@@ -608,7 +608,9 @@ vue3之所以会有很大的性能提升，编译器起到了很大的作用，�
 * 更快的定位工作中遇到的问题
 
  ```js
-   const { createVNode, render, ref } = Vue
+ // 实现一个弹窗的封装技巧  
+ // 通过createVNode render 生成真实dom
+ const { createVNode,  render, ref } = Vue
          const message = {
              setup() {
                  const num = ref(1)
@@ -621,6 +623,7 @@ vue3之所以会有很大的性能提升，编译器起到了很大的作用，�
                          <div>这是一个弹窗</div>
                        </div>`
          }
+         // 生成实例
          const vm = createVNode(message)
          const container = document.createElement('div')
          //通过patch 变成dom

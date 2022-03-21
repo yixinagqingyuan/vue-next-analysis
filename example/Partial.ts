@@ -59,3 +59,49 @@ function abc(b: string | number) {
     b = 1
 }
 
+function fn<T, M>(a: M): M {
+    return a
+}
+fn<number, string>('1')
+
+var ab: number = 1
+a.toString
+
+function createArray<T>(length: T): T {
+    return length
+}
+
+createArray(1); // ['x', 'x', 'x']
+
+
+function arrToObj<
+    T extends Record<L | V, unknown>,
+    L extends string,
+    V extends string,
+    >(arr: T[], label: L, value: V): Record<string, T[L]>
+function arrToObj<T extends Record<L | 'value', unknown>, L extends string>(
+    arr: T[],
+    label: L,
+): Record<string, T[L | 'value']>
+function arrToObj<T extends Record<'label' | 'value', unknown>>(
+    arr: T[],
+): Record<string, T['label' | 'value']>
+function arrToObj(
+    arr: Record<string, unknown>[],
+    label = 'label',
+    value = 'value',
+) {
+    return arr as any
+}
+arrToObj([{ aaa: 's', value: "1" }], 'aaa')
+
+// const ab: Record<number, string> = {
+//     1: '1'
+
+// }
+
+// // type studentScore = { [name: string]: number }
+// type studentScore = Record<string, number>
+// const aaa: studentScore = {
+//     a: 1
+// }

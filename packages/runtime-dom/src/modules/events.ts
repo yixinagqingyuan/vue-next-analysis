@@ -60,7 +60,7 @@ export function removeEventListener(
 ) {
   el.removeEventListener(event, handler, options)
 }
-
+// 事件的patch 函数
 export function patchEvent(
   el: Element & { _vei?: Record<string, Invoker | undefined> },
   rawName: string,
@@ -77,7 +77,8 @@ export function patchEvent(
   } else {
     const [name, options] = parseName(rawName)
     if (nextValue) {
-      // add
+      // 先对事件函数来一层包装，在将包装函数绑定到dom 上去
+      // 如果开启缓存，就会将当前包装函数缓存，省去了diff 的 开销，直接复用
       const invoker = (invokers[rawName] = createInvoker(nextValue, instance))
       addEventListener(el, name, invoker, options)
     } else if (existingInvoker) {
