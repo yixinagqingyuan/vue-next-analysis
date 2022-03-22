@@ -1387,6 +1387,7 @@ function baseCreateRenderer(
 
         toggleRecurse(instance, false)
         // beforeMount hook
+        //  beforeMount 初始化的钩子
         if (bm) {
           invokeArrayFns(bm)
         }
@@ -1408,6 +1409,7 @@ function baseCreateRenderer(
         if (el && hydrateNode) {
           // vnode has adopted host node - perform hydration instead of mount.
           const hydrateSubTree = () => {
+            // div 暂时不看
             if (__DEV__) {
               startMeasure(instance, `render`)
             }
