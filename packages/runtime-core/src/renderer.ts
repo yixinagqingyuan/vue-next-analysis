@@ -1596,6 +1596,7 @@ function baseCreateRenderer(
         }
         // updated hook
         if (u) {
+          // 这个函数会执行queuePostFlushCb然后将订阅函数放入（任务）队列
           queuePostRenderEffect(u, parentSuspense)
         }
         // onVnodeUpdated
@@ -1667,6 +1668,8 @@ function baseCreateRenderer(
     updateSlots(instance, nextVNode.children, optimized)
 
     pauseTracking()
+    //道具更新可能触发了预冲洗观察者。
+    //在渲染更新之前刷新它们。
     // props update may have triggered pre-flush watchers.
     // flush them before the render update.
     flushPreFlushCbs(undefined, instance.update)

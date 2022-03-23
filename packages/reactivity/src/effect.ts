@@ -90,6 +90,7 @@ export class ReactiveEffect<T = any> {
       try {
         // 压栈
         effectStack.push((activeEffect = this))
+        // 开启全局 shouldTrack，允许依赖收集
         enableTracking()
         // 根据递归的深度记录位数
         // 前++ 会返回新值
@@ -188,17 +189,19 @@ export function stop(runner: ReactiveEffectRunner) {
 }
 
 let shouldTrack = true
+// shouldTrack:用于标识是否可执行 track，由内部方法 pauseTracking和 enableTracking 切换状态
 const trackStack: boolean[] = []
+// 暂停依赖收集
 export function pauseTracking() {
   trackStack.push(shouldTrack)
   shouldTrack = false
 }
-
+// 开始依赖收集
 export function enableTracking() {
   trackStack.push(shouldTrack)
   shouldTrack = true
 }
-
+// 重置依赖收集,恢复 shouldTrack 开启之前的状态 
 export function resetTracking() {
   const last = trackStack.pop()
   shouldTrack = last === undefined ? true : last

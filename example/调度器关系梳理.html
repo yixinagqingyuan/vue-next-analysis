@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        //pre cbs 
+        let pendingPreFlushCbs = [];
+        let activePreFlushCbs = null;
+        let preFlushIndex = 0;
+        let isFlushing = false
+        let resolvedPromise = Promise.resolve()
+
+        function queuePreFlushCb(cb) {
+            // cb 没有正在执行才进入等待队列
+            if (!activePreFlushCbs || !activePreFlushCbs.includes(cb))
+                pendingPreFlushCbs.push(cb);
+
+            // 立即刷新队列
+            if (!isFlushing) {
+                // 这里需要异步执行，让所有任务在同一个 tick 里面执行
+                // 不然进来一个就会立即执行
+                resolvedPromise.then(flushPreFlushCbs)
+            }
+        }
+
+        function flushPreFlushCbs() {
+            isFlushing = true
+            // 一开始入列的是 pending 所以最开始这里应该是有任务的
+            if (pendingPreFlushCbs.length) {
+                // 为了去重使用集合，得到下面将执行的任务队列
+                activePreFlushCbs = [...new Set(pendingPreFlushCbs)];
+                // 这里情况等待队列，准备接受新的任务
+                pendingPreFlushCbs.length = 0;
+
+                for (
+                    preFlushIndex = 0;
+                    preFlushIndex < activePreFlushCbs.length;
+                    preFlushIndex++
+                ) {
+                    // 开始执行任务
+                    activePreFlushCbs[preFlushIndex]();
+                }
+
+                // 执行完成之后，清理数据
+                activePreFlushCbs = null;
+                preFlushIndex = 0;
+
+                // 递归知道所有任务执行完成
+                flushPreFlushCbs();
+            }
+        }
+
+        const cb1 = () => console.log("\ncb 1");
+        const cb2 = () => {
+            console.log("cb 2")
+            // 这里在执行任务期间，插入新的任务 cb2.1 看它会在什么时候被执行
+            queuePreFlushCb(() => console.log('cb 2.1'))
+        };
+        const cb3 = () => {
+            // 同理，只不过这里放在打印之前
+            queuePreFlushCb(() => console.log('cb 3.1'))
+            console.log("cb 3")
+        };
+        const cb4 = () => console.log("cb 4");
+        console.log(">>> 结果");
+        debugger
+        // 利用promise来实现调度器
+        [cb1, cb2, cb3, cb4].forEach((cb) => queuePreFlushCb(cb));
+
+
+    </script>
+</body>
+
+</html>
