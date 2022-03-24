@@ -231,8 +231,10 @@ export function track(target: object, type: TrackOpTypes, key: unknown) {
 
   trackEffects(dep, eventInfo)
 }
-
+// 判断是否需要收集依赖
 export function isTracking() {
+  // shouldTrack 是一个全局变量，代表当前是否需要 track 收集依赖
+  // activeEffect 也是个全局变量，代表当前的副作用对象 ReactiveEffect
   return shouldTrack && activeEffect !== undefined
 }
 // 这一块就是依赖收集的地方

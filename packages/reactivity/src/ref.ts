@@ -27,11 +27,13 @@ type RefBase<T> = {
   value: T
 }
 
-// ref就是一个effect 
+// ref就是一个传入的可能是保存原始值的对象，也可能是计算属性
 export function trackRefValue(ref: RefBase<any>) {
+  // 判断是否需要收集依赖
   if (isTracking()) {
     ref = toRaw(ref)
     //开始创建小管家
+    // 如果没有 dep 属性，则初始化 dep，dep 是一个 Set<ReactiveEffect>，存储副作用函数
     if (!ref.dep) {
       // 在effect 中已经声明默认为空值，如果没有俺么就在创建一个
       ref.dep = createDep()
