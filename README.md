@@ -11,6 +11,7 @@
 - [x] [从ref入手理解响应式原理](example/从ref入手理解响应式原理.html)
 - [x] [createVNode 配合render自定义message](example/createVNode配合render自定义message.html)
 - [x] [调度器关系梳理](example/调度器关系梳理.html)
+- [x] [JSX和函数式组件的使用](example/JSX和函数式组件的使用.html)
 # 一些辅助理解文章
 
 - [x] [细说 Vue.js 3.2 关于响应式部分的优化](https://juejin.cn/post/6995732683435278344)

@@ -1014,7 +1014,3 @@ export function formatComponentName(
 export function isClassComponent(value: unknown): value is ClassComponent {
   return isFunction(value) && '__vccOpts' in value
 }
-
-let a = null!
-
-a = undefined

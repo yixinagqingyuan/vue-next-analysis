@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../packages/vue/dist/vue.global.js"></script>
+</head>
+
+<body>
+    <script>
+        const { createApp } = Vue;
+        //模板组件1
+        const btn1 = {
+            setup() {
+                const num = ref(1)
+                return {
+                    num
+                }
+            },
+            template: `<div>模板组件1{{num}}<div>`
+        }
+        // 模板组件2
+        const btn2 = {
+            setup() {
+                const num = ref(2)
+                return {
+                    num
+                }
+            },
+            template: `<div>模板组件2{{num}}<div>`
+        }
+
+        // 容器组件
+        createApp({
+            //是个函数式组件
+            component: {
+                btn1, btn2
+            }
+            
+            , 
+            render() {
+                return   <btn1/>:<btn2/>
+            }
+        })
+    </script>
+</body>
+
+</html>

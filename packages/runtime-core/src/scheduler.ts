@@ -65,8 +65,11 @@ export function nextTick<T = void>(
 
 // #2768
 // Use binary-search to find a suitable position in the queue,
-// so that the queue maintains the increasing order of job's id,
+// so that the queue maintZains the increasing order of job's id,
 // which can prevent the job from being skipped and also can avoid repeated patching.
+//使用二进制搜索在队列中找到合适的位置，
+//这样队列将保持作业id的递增顺序，
+//这可以防止作业被跳过，也可以避免重复修补。
 function findInsertionIndex(id: number) {
   // the start index should be `flushIndex + 1`
   let start = flushIndex + 1
@@ -88,6 +91,13 @@ export function queueJob(job: SchedulerJob) {
   // if the job is a watch() callback, the search will start with a +1 index to
   // allow it recursively trigger itself - it is the user's responsibility to
   // ensure it doesn't end up in an infinite loop.
+  //重复数据消除搜索使用数组的startIndex参数。包括（）
+  //默认情况下，搜索索引包括正在运行的当前作业
+  //因此，它不能再次递归触发自身。
+  //如果作业是watch（）回调，则搜索将以+1索引开始，以
+  //允许它递归地触发自己——这是用户的责任
+  //确保它不会以无限循环结束。
+  // 如果有了就不插入任务队列
   if (
     (!queue.length ||
       !queue.includes(
@@ -104,10 +114,15 @@ export function queueJob(job: SchedulerJob) {
     queueFlush()
   }
 }
-
+// 冲刷队列
 function queueFlush() {
+  // 如果没有正在刷新的 && 正在等待刷新的
+  // 则执行 flushJobs
   if (!isFlushing && !isFlushPending) {
+    // 正在等待刷新
     isFlushPending = true
+    // 启动微任务，开始刷新任务队列。
+    // flushJobs执行结束 将promise赋值给 currentFlushPromise
     currentFlushPromise = resolvedPromise.then(flushJobs)
   }
 }
@@ -155,7 +170,9 @@ export function flushPreFlushCbs(
 ) {
   if (pendingPreFlushCbs.length) {
     currentPreFlushParentJob = parentJob
+    // 👉 去重
     activePreFlushCbs = [...new Set(pendingPreFlushCbs)]
+    // 👉  置预刷jobs array 为空
     pendingPreFlushCbs.length = 0
     if (__DEV__) {
       seen = seen || new Map()
@@ -169,34 +186,43 @@ export function flushPreFlushCbs(
         __DEV__ &&
         checkRecursiveUpdates(seen!, activePreFlushCbs[preFlushIndex])
       ) {
+        // 递归刷新检查
         continue
       }
+      // 👉 执行job eg: watch job
+      // 👉 watch 会在这里执行
       activePreFlushCbs[preFlushIndex]()
     }
+    // 👉 重置
     activePreFlushCbs = null
     preFlushIndex = 0
     currentPreFlushParentJob = null
     // recursively flush until it drains
+    // 👉 递归刷新预刷新jobs
     flushPreFlushCbs(seen, parentJob)
   }
 }
 
 export function flushPostFlushCbs(seen?: CountMap) {
+  // 👉 如果存在后置刷新任务
   if (pendingPostFlushCbs.length) {
+    // 👉 去重job
     const deduped = [...new Set(pendingPostFlushCbs)]
+    // 👉 正在等待的任务池 情况
     pendingPostFlushCbs.length = 0
 
     // #1947 already has active queue, nested flushPostFlushCbs call
     if (activePostFlushCbs) {
+      // 👉 如果已经有活跃的队列，嵌套的flushPostFlushCbs调用
       activePostFlushCbs.push(...deduped)
       return
     }
-
+    // 👉 将等待的作为当前的任务
     activePostFlushCbs = deduped
     if (__DEV__) {
       seen = seen || new Map()
     }
-
+    // 👉 对后置任务进行排序
     activePostFlushCbs.sort((a, b) => getId(a) - getId(b))
 
     for (
@@ -210,8 +236,11 @@ export function flushPostFlushCbs(seen?: CountMap) {
       ) {
         continue
       }
+
+      //👉  执行后置任务
       activePostFlushCbs[postFlushIndex]()
     }
+    // 👉 重置正在执行的任务池
     activePostFlushCbs = null
     postFlushIndex = 0
   }
@@ -220,15 +249,18 @@ export function flushPostFlushCbs(seen?: CountMap) {
 const getId = (job: SchedulerJob): number =>
   job.id == null ? Infinity : job.id
 
+
 function flushJobs(seen?: CountMap) {
+  // 👉 等待刷新结束，开始刷新
   isFlushPending = false
   isFlushing = true
   if (__DEV__) {
     seen = seen || new Map()
   }
-
+  // 👉 前置刷新开始 jobs
+  // 为watch量身定做是，主要就是异步执行watch，以及watcheffect等内容的依赖
   flushPreFlushCbs(seen)
-
+  // 👉 前置刷新结束
   // Sort queue before flush.
   // This ensures that:
   // 1. Components are updated from parent to child. (because parent is always
@@ -236,6 +268,9 @@ function flushJobs(seen?: CountMap) {
   //    priority number)
   // 2. If a component is unmounted during a parent component's update,
   //    its update can be skipped.
+  // 👉 在刷新前对队列排序
+  // 1. 保证组件更新顺序是从父组件到子组件（因为父组件总是在子组件之前创建，所以其渲染副作用的优先级将更小）
+  // 2.如果一个子组件在父组件更新期间卸载了，可以跳过该子组件的更新。
   queue.sort((a, b) => getId(a) - getId(b))
 
   // conditional usage of checkRecursiveUpdate must be determined out of
@@ -255,24 +290,29 @@ function flushJobs(seen?: CountMap) {
           continue
         }
         // console.log(`running:`, job.id)
+        // 执行 job 函数
         callWithErrorHandling(job, null, ErrorCodes.SCHEDULER)
       }
     }
   } finally {
+    // 👉 重置正在刷新队列
     flushIndex = 0
     queue.length = 0
-
+    // 👉 刷新后置刷新jobs
     flushPostFlushCbs(seen)
-
+    // 👉 刷新结束
     isFlushing = false
     currentFlushPromise = null
     // some postFlushCb queued jobs!
     // keep flushing until it drains.
+    // 👉 如果还有当前任务或者，等待的预算新任务，或者等待的后刷新任务，则递归刷新
+
     if (
       queue.length ||
       pendingPreFlushCbs.length ||
       pendingPostFlushCbs.length
     ) {
+      // 递归刷新
       flushJobs(seen)
     }
   }
@@ -287,13 +327,12 @@ function checkRecursiveUpdates(seen: CountMap, fn: SchedulerJob) {
       const instance = fn.ownerInstance
       const componentName = instance && getComponentName(instance.type)
       warn(
-        `Maximum recursive updates exceeded${
-          componentName ? ` in component <${componentName}>` : ``
+        `Maximum recursive updates exceeded${componentName ? ` in component <${componentName}>` : ``
         }. ` +
-          `This means you have a reactive effect that is mutating its own ` +
-          `dependencies and thus recursively triggering itself. Possible sources ` +
-          `include component template, render function, updated hook or ` +
-          `watcher source function.`
+        `This means you have a reactive effect that is mutating its own ` +
+        `dependencies and thus recursively triggering itself. Possible sources ` +
+        `include component template, render function, updated hook or ` +
+        `watcher source function.`
       )
       return true
     } else {
