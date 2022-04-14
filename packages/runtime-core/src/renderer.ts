@@ -1384,7 +1384,7 @@ function baseCreateRenderer(
         const { el, props } = initialVNode
         const { bm, m, parent } = instance
         const isAsyncWrapperVNode = isAsyncWrapper(initialVNode)
-
+        // 不禁用递归
         toggleRecurse(instance, false)
         // beforeMount hook
         //  beforeMount 初始化的钩子
@@ -1392,12 +1392,15 @@ function baseCreateRenderer(
           invokeArrayFns(bm)
         }
         // onVnodeBeforeMount
+        // 处理节点挂载钱在函数执行的时候传入的vnode 的钩子，一般在编译的情况下无法见到
+        // 不常用
         if (
           !isAsyncWrapperVNode &&
           (vnodeHook = props && props.onVnodeBeforeMount)
         ) {
           invokeVNodeHook(vnodeHook, parent, initialVNode)
         }
+        // 这是为了兼容vue2 的hook:beforeMount
         if (
           __COMPAT__ &&
           isCompatEnabled(DeprecationTypes.INSTANCE_EVENT_HOOKS, instance)
@@ -1405,9 +1408,10 @@ function baseCreateRenderer(
           instance.emit('hook:beforeMount')
         }
         toggleRecurse(instance, true)
-
+        // 服务端
         if (el && hydrateNode) {
           // vnode has adopted host node - perform hydration instead of mount.
+          //vnode采用了主机节点，而不是挂载。
           const hydrateSubTree = () => {
             // div 暂时不看
             if (__DEV__) {
@@ -1460,6 +1464,7 @@ function baseCreateRenderer(
           }
           // 主要执行patch，这是初始化的时候执行的 
           // 第一次执行，依赖收集开始了
+          // 将渲染vnode patch到dom视图上
           patch(
             null,
             subTree,
@@ -1639,6 +1644,7 @@ function baseCreateRenderer(
     update.id = instance.uid
     // allowRecurse
     // #1801, #2043 component render effects should allow recursive updates
+    //组件渲染效果应该允许递归更新
     toggleRecurse(instance, true)
 
     if (__DEV__) {
@@ -2315,7 +2321,7 @@ function baseCreateRenderer(
     if (bum) {
       invokeArrayFns(bum)
     }
-
+    // 兼容vue2钩子 hook:beforeDestroy
     if (
       __COMPAT__ &&
       isCompatEnabled(DeprecationTypes.INSTANCE_EVENT_HOOKS, instance)
@@ -2328,9 +2334,12 @@ function baseCreateRenderer(
     scope.stop()
 
     // update may be null if a component is unmounted before its async
+    //如果组件在异步之前卸载，则更新可能为空
     // setup has resolved.
+    //安装程序已解决
     if (update) {
       // so that scheduler will no longer invoke it
+      //样调度器就不会再调用它了
       update.active = false
       unmount(subTree, instance, parentSuspense, doRemove)
     }
@@ -2338,6 +2347,7 @@ function baseCreateRenderer(
     if (um) {
       queuePostRenderEffect(um, parentSuspense)
     }
+    // vue2兼容
     if (
       __COMPAT__ &&
       isCompatEnabled(DeprecationTypes.INSTANCE_EVENT_HOOKS, instance)
@@ -2440,7 +2450,7 @@ function baseCreateRenderer(
     createApp: createAppAPI(render, hydrate)
   }
 }
-
+// 兼容函数，是否禁用递归执行 true 表示允许，flase 表示不允许
 function toggleRecurse(
   { effect, update }: ComponentInternalInstance,
   allowed: boolean

@@ -36,45 +36,46 @@ export type EmitsOptions = ObjectEmitsOptions | string[]
 
 export type EmitsToProps<T extends EmitsOptions> = T extends string[]
   ? {
-      [K in string & `on${Capitalize<T[number]>}`]?: (...args: any[]) => any
-    }
+    [K in string & `on${Capitalize<T[number]>}`]?: (...args: any[]) => any
+  }
   : T extends ObjectEmitsOptions
   ? {
-      [K in string &
-        `on${Capitalize<string & keyof T>}`]?: K extends `on${infer C}`
-        ? T[Uncapitalize<C>] extends null
-          ? (...args: any[]) => any
-          : (
-              ...args: T[Uncapitalize<C>] extends (...args: infer P) => any
-                ? P
-                : never
-            ) => any
+    [K in string &
+    `on${Capitalize<string & keyof T>}`]?: K extends `on${infer C}`
+    ? T[Uncapitalize<C>] extends null
+    ? (...args: any[]) => any
+    : (
+      ...args: T[Uncapitalize<C>] extends (...args: infer P) => any
+        ? P
         : never
-    }
+    ) => any
+    : never
+  }
   : {}
 
 export type EmitFn<
   Options = ObjectEmitsOptions,
   Event extends keyof Options = keyof Options
-> = Options extends Array<infer V>
+  > = Options extends Array<infer V>
   ? (event: V, ...args: any[]) => void
   : {} extends Options // if the emit is empty object (usually the default value for emit) should be converted to function
   ? (event: string, ...args: any[]) => void
   : UnionToIntersection<
-      {
-        [key in Event]: Options[key] extends (...args: infer Args) => any
-          ? (event: key, ...args: Args) => void
-          : (event: key, ...args: any[]) => void
-      }[Event]
-    >
+    {
+      [key in Event]: Options[key] extends (...args: infer Args) => any
+      ? (event: key, ...args: Args) => void
+      : (event: key, ...args: any[]) => void
+    }[Event]
+  >
 
 export function emit(
   instance: ComponentInternalInstance,
   event: string,
   ...rawArgs: any[]
 ) {
+  // n拿到vnode的props 如果没有走默认值
   const props = instance.vnode.props || EMPTY_OBJ
-
+  // dev 情况暂时不看
   if (__DEV__) {
     const {
       emitsOptions,
@@ -92,7 +93,7 @@ export function emit(
         if (!propsOptions || !(toHandlerKey(event) in propsOptions)) {
           warn(
             `Component emitted event "${event}" but it is neither declared in ` +
-              `the emits option nor as an "${toHandlerKey(event)}" prop.`
+            `the emits option nor as an "${toHandlerKey(event)}" prop.`
           )
         }
       } else {
@@ -108,16 +109,18 @@ export function emit(
       }
     }
   }
-
+  // 拿到后面的值
   let args = rawArgs
+  //startsWith() 方法用来判断当前字符串是否以另外一个给定的子字符串开头
   const isModelListener = event.startsWith('update:')
 
   // for v-model update:xxx events, apply modifiers on args
+  //对于v-model更新：xxx事件，在参数上应用修饰符F
+  // 如果是 那么去除事件名字
   const modelArg = isModelListener && event.slice(7)
   if (modelArg && modelArg in props) {
-    const modifiersKey = `${
-      modelArg === 'modelValue' ? 'model' : modelArg
-    }Modifiers`
+    const modifiersKey = `${modelArg === 'modelValue' ? 'model' : modelArg
+      }Modifiers`
     const { number, trim } = props[modifiersKey] || EMPTY_OBJ
     if (trim) {
       args = rawArgs.map(a => a.trim())
@@ -129,19 +132,19 @@ export function emit(
   if (__DEV__ || __FEATURE_PROD_DEVTOOLS__) {
     devtoolsComponentEmit(instance, event, args)
   }
-
+  // dev 情况暂时不看
   if (__DEV__) {
     const lowerCaseEvent = event.toLowerCase()
     if (lowerCaseEvent !== event && props[toHandlerKey(lowerCaseEvent)]) {
       warn(
         `Event "${lowerCaseEvent}" is emitted in component ` +
-          `${formatComponentName(
-            instance,
-            instance.type
-          )} but the handler is registered for "${event}". ` +
-          `Note that HTML attributes are case-insensitive and you cannot use ` +
-          `v-on to listen to camelCase events when using in-DOM templates. ` +
-          `You should probably use "${hyphenate(event)}" instead of "${event}".`
+        `${formatComponentName(
+          instance,
+          instance.type
+        )} but the handler is registered for "${event}". ` +
+        `Note that HTML attributes are case-insensitive and you cannot use ` +
+        `v-on to listen to camelCase events when using in-DOM templates. ` +
+        `You should probably use "${hyphenate(event)}" instead of "${event}".`
       )
     }
   }

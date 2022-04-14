@@ -568,6 +568,7 @@ function installCompatMount(
         if (bum) {
           invokeArrayFns(bum)
         }
+
         if (isCompatEnabled(DeprecationTypes.INSTANCE_EVENT_HOOKS, instance)) {
           instance.emit('hook:beforeDestroy')
         }

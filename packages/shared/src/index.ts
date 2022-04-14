@@ -125,6 +125,7 @@ export const capitalize = cacheStringFunction(
 /**
  * @private
  */
+// 吐出对饮的事件方法
 export const toHandlerKey = cacheStringFunction((str: string) =>
   str ? `on${capitalize(str)}` : ``
 )

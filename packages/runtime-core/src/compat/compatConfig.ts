@@ -237,8 +237,7 @@ export const deprecationData: Record<DeprecationTypes, DeprecationData> = {
 
   [DeprecationTypes.INSTANCE_ATTRS_CLASS_STYLE]: {
     message: componentName =>
-      `Component <${
-        componentName || 'Anonymous'
+      `Component <${componentName || 'Anonymous'
       }> has \`inheritAttrs: false\` but is ` +
       `relying on class/style fallthrough from parent. In Vue 3, class/style ` +
       `are now included in $attrs and will no longer fallthrough when ` +
@@ -317,8 +316,7 @@ export const deprecationData: Record<DeprecationTypes, DeprecationData> = {
   [DeprecationTypes.ATTR_ENUMERATED_COERCION]: {
     message: (name: string, value: any, coerced: string) =>
       `Enumerated attribute "${name}" with v-bind value \`${value}\` will ` +
-      `${
-        value === null ? `be removed` : `render the value as-is`
+      `${value === null ? `be removed` : `render the value as-is`
       } instead of coercing the value to "${coerced}" in Vue 3. ` +
       `Always use explicit "true" or "false" values for enumerated attributes. ` +
       `If the usage is intended, ` +
@@ -345,8 +343,7 @@ export const deprecationData: Record<DeprecationTypes, DeprecationData> = {
     message: (comp: any) => {
       const name = getComponentName(comp)
       return (
-        `Async component${
-          name ? ` <${name}>` : `s`
+        `Async component${name ? ` <${name}>` : `s`
         } should be explicitly created via \`defineAsyncComponent()\` ` +
         `in Vue 3. Plain functions will be treated as functional components in ` +
         `non-compat build. If you have already migrated all async component ` +
@@ -363,8 +360,7 @@ export const deprecationData: Record<DeprecationTypes, DeprecationData> = {
     message: (comp: any) => {
       const name = getComponentName(comp)
       return (
-        `Functional component${
-          name ? ` <${name}>` : `s`
+        `Functional component${name ? ` <${name}>` : `s`
         } should be defined as a plain function in Vue 3. The "functional" ` +
         `option has been removed. NOTE: Before migrating to use plain ` +
         `functions for functional components, first make sure that all async ` +
@@ -480,14 +476,13 @@ export function warnDeprecation(
 
   const { message, link } = deprecationData[key]
   warn(
-    `(deprecation ${key}) ${
-      typeof message === 'function' ? message(...args) : message
+    `(deprecation ${key}) ${typeof message === 'function' ? message(...args) : message
     }${link ? `\n  Details: ${link}` : ``}`
   )
   if (!isCompatEnabled(key, instance, true)) {
     console.error(
       `^ The above deprecation's compat behavior is disabled and will likely ` +
-        `lead to runtime errors.`
+      `lead to runtime errors.`
     )
   }
 }
@@ -532,9 +527,9 @@ export function validateCompatConfig(
         if (isRuntimeOnly()) {
           warn(
             `Deprecation config "${key}" is compiler-specific and you are ` +
-              `running a runtime-only build of Vue. This deprecation should be ` +
-              `configured via compiler options in your build setup instead.\n` +
-              `Details: https://v3.vuejs.org/guide/migration/migration-build.html`
+            `running a runtime-only build of Vue. This deprecation should be ` +
+            `configured via compiler options in your build setup instead.\n` +
+            `Details: https://v3.vuejs.org/guide/migration/migration-build.html`
           )
         }
       } else {
@@ -569,6 +564,7 @@ export function isCompatEnabled(
   enableForBuiltIn = false
 ): boolean {
   // skip compat for built-in components
+  //跳过内置组件的compat
   if (!enableForBuiltIn && instance && instance.type.__isBuiltIn) {
     return false
   }

@@ -334,6 +334,7 @@ function doWatch(
   }
 
   // important: mark the job as a watcher callback so that scheduler knows
+  //重要提示：将作业标记为观察者回调，以便调度程序知道
   // it is allowed to self-trigger (#1727)
   job.allowRecurse = !!cb
 

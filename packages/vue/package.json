@@ -42,7 +42,7 @@
   },
   "buildOptions": {
     "name": "Vue",
-    "formats": [
+    " ": [
       "esm-bundler",
       "esm-bundler-runtime",
       "cjs",
