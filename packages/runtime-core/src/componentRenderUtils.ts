@@ -64,14 +64,18 @@ export function renderComponentRoot(
   let fallthroughAttrs
   // 两个功能保存当前instance，返回上一个 instance
   const prev = setCurrentRenderingInstance(instance)
+  // dev 暂时不看
   if (__DEV__) {
     accessedAttrs = false
   }
 
   try {
+    // 判断是不是普通组件
     if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
       // withProxy is a proxy with a different `has` trap only for
       // runtime-compiled render functions using `with` block.
+      //withProxy是一个仅针对
+      //运行时使用`with`块编译渲染函数。
       const proxyToUse = withProxy || proxy
       // 这个reslut 就是vnode 
       // 经过测试，render的返回值是第二个参数，的一个参数是为了block
@@ -86,6 +90,7 @@ export function renderComponentRoot(
           ctx
         )
       )
+      // 赋值Attribute
       fallthroughAttrs = attrs
     } else {
       // functional
@@ -128,8 +133,10 @@ export function renderComponentRoot(
   //attr合并
   //在开发模式下，注释会被保留，并且可以使用模板
   //在根元素旁边添加注释，使其成为一个片段
+  // 如果能拿到render 的结果就赋值root 
   let root = result
   let setRoot: ((root: VNode) => void) | undefined = undefined
+  // dev 情况暂时不看
   if (
     __DEV__ &&
     result.patchFlag > 0 &&
@@ -137,22 +144,30 @@ export function renderComponentRoot(
   ) {
     ;[root, setRoot] = getChildRoot(result)
   }
-
+  // 如果有Attribute
+  //“fallthrough 属性”是v-on传递给组件的属性或事件侦听器，但未在接收组件的props或emits中显式声明。这方面的常见示例包括class、style和id属性。
   if (fallthroughAttrs && inheritAttrs !== false) {
+    // 拿到所有的属性名字
     const keys = Object.keys(fallthroughAttrs)
+    // 获取节点类型
     const { shapeFlag } = root
     if (keys.length) {
+      // |和& 的运算顺序没有优先级，为从左到右，当前代码中，由于 有括号 先算括号111
+      //  当前的条件要想命中，必须shapeFlag必须在当前二级制位的一位上，结果才能为ture 
+      // 换句话说就是当前类型要如果是普通节点类型，或者组件类型
       if (shapeFlag & (ShapeFlags.ELEMENT | ShapeFlags.COMPONENT)) {
         if (propsOptions && keys.some(isModelListener)) {
           // If a v-model listener (onUpdate:xxx) has a corresponding declared
           // prop, it indicates this component expects to handle v-model and
           // it should not fallthrough.
           // related: #1543, #1643, #1989
+          // 做一个简单的排除，将props 以及 vmodel 的情况，只保留常规的内容
           fallthroughAttrs = filterModelListeners(
             fallthroughAttrs,
             propsOptions
           )
         }
+        // 克隆一个节点并且将 这也常规的attr 加入进去
         root = cloneVNode(root, fallthroughAttrs)
       } else if (__DEV__ && !accessedAttrs && root.type !== Comment) {
         const allAttrs = Object.keys(attrs)

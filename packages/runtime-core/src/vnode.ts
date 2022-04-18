@@ -744,6 +744,7 @@ export function normalizeVNode(child: VNodeChild): VNode {
       Fragment,
       null,
       // #3666, avoid reference pollution when reusing vnode
+      //重复使用vnode时避免引用污染，slice 来做一个浅拷贝
       child.slice()
     )
   } else if (typeof child === 'object') {

@@ -1408,7 +1408,12 @@ function baseCreateRenderer(
           instance.emit('hook:beforeMount')
         }
         toggleRecurse(instance, true)
-        // 服务端
+        // 服务端渲染使用
+        // 所谓hydrate 就是因为ssr时服务器输出的是字符串，而浏览器端需要根据这些字符串完成react的初始化工作 
+        // 在一个web端的常规应用程序中，结构、样式、行为 缺一不可，而在服务端无法初始化 行为的的初始化
+        // 所以hydrate 直接复用服务端字符串完成行为的初始化的过程
+        // 一般在源码中出现hydrateNode 字样，一般也就是服务端渲染的情况了
+        // 不是客户端主流程，咱暂时不处理
         if (el && hydrateNode) {
           // vnode has adopted host node - perform hydration instead of mount.
           //vnode采用了主机节点，而不是挂载。
@@ -1449,6 +1454,7 @@ function baseCreateRenderer(
             hydrateSubTree()
           }
         } else {
+          // dev 环境暂时不看
           if (__DEV__) {
             startMeasure(instance, `render`)
           }
@@ -2438,6 +2444,7 @@ function baseCreateRenderer(
   let hydrate: ReturnType<typeof createHydrationFunctions>[0] | undefined
   let hydrateNode: ReturnType<typeof createHydrationFunctions>[1] | undefined
   if (createHydrationFns) {
+    // 服务端渲染单独的方法，实际上就是在原函数上包装
     ;[hydrate, hydrateNode] = createHydrationFns(
       internals as RendererInternals<Node, Element>
     )

@@ -124,7 +124,7 @@ export const createApp = ((...args) => {
 
   return app
 }) as CreateAppFunction<Element>
-
+// 服务端渲染
 export const createSSRApp = ((...args) => {
   const app = ensureHydrationRenderer().createApp(...args)
 
