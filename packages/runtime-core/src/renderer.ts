@@ -267,7 +267,7 @@ export const enum MoveType {
   LEAVE,
   REORDER
 }
-
+// 是否启用新特性Suspense 
 export const queuePostRenderEffect = __FEATURE_SUSPENSE__
   ? queueEffectWithSuspense
   : queuePostFlushCb
@@ -355,7 +355,7 @@ function baseCreateRenderer(
     insertStaticContent: hostInsertStaticContent
   } = options
 
-  //注意：此闭包中的函数应该使用`constxxx=（）=>{}`
+  //注意：createHydrationFunctions此闭包中createHydrationFunctions的函数应该使用`constxxx=（）=>{}`
   //样式，以防止缩微器内联。
   //创建 patch 函数，也就是打补丁函数，diff 的核心就在这 初始化创建dom的核心也在这
   const patch: PatchFn = (
@@ -1383,6 +1383,7 @@ function baseCreateRenderer(
         let vnodeHook: VNodeHook | null | undefined
         const { el, props } = initialVNode
         const { bm, m, parent } = instance
+        // 是否是异步组件
         const isAsyncWrapperVNode = isAsyncWrapper(initialVNode)
         // 不禁用递归
         toggleRecurse(instance, false)
@@ -1430,6 +1431,7 @@ function baseCreateRenderer(
             if (__DEV__) {
               startMeasure(instance, `hydrate`)
             }
+            // 服务端的patch 
             hydrateNode!(
               el as Node,
               instance.subTree,
@@ -1441,7 +1443,7 @@ function baseCreateRenderer(
               endMeasure(instance, `hydrate`)
             }
           }
-
+          //如果是异步组件
           if (isAsyncWrapperVNode) {
             ; (initialVNode.type as ComponentOptions).__asyncLoader!().then(
               // note: we are moving the render call into an async callback,
@@ -2427,7 +2429,8 @@ function baseCreateRenderer(
     flushPostFlushCbs()
     container._vnode = vnode
   }
-
+  // 将patch中的通用方法挑出来在服务端使用，然后包装
+  // 之所以使用新名字是，这里猜可能是为了防止名字重复
   const internals: RendererInternals = {
     p: patch,
     um: unmount,
@@ -2445,6 +2448,7 @@ function baseCreateRenderer(
   let hydrateNode: ReturnType<typeof createHydrationFunctions>[1] | undefined
   if (createHydrationFns) {
     // 服务端渲染单独的方法，实际上就是在原函数上包装
+    // 解构赋值
     ;[hydrate, hydrateNode] = createHydrationFns(
       internals as RendererInternals<Node, Element>
     )

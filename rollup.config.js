@@ -165,19 +165,19 @@ function createConfig(format, output, plugins = []) {
 
   const nodePlugins =
     (format === 'cjs' && Object.keys(pkg.devDependencies || {}).length) ||
-    packageOptions.enableNonBrowserBranches
+      packageOptions.enableNonBrowserBranches
       ? [
-          // @ts-ignore
-          require('@rollup/plugin-commonjs')({
-            sourceMap: false,
-            ignore: cjsIgnores
-          }),
-          ...(format === 'cjs'
-            ? []
-            : // @ts-ignore
-              [require('rollup-plugin-polyfill-node')()]),
-          require('@rollup/plugin-node-resolve').nodeResolve()
-        ]
+        // @ts-ignore
+        require('@rollup/plugin-commonjs')({
+          sourceMap: false,
+          ignore: cjsIgnores
+        }),
+        ...(format === 'cjs'
+          ? []
+          : // @ts-ignore
+          [require('rollup-plugin-polyfill-node')()]),
+        require('@rollup/plugin-node-resolve').nodeResolve()
+      ]
       : []
 
   return {
@@ -196,7 +196,7 @@ function createConfig(format, output, plugins = []) {
         isBrowserESMBuild,
         // isBrowserBuild?
         (isGlobalBuild || isBrowserESMBuild || isBundlerESMBuild) &&
-          !packageOptions.enableNonBrowserBranches,
+        !packageOptions.enableNonBrowserBranches,
         isGlobalBuild,
         isNodeBuild,
         isCompatBuild
@@ -230,9 +230,9 @@ function createReplacePlugin(
     __VERSION__: `"${masterVersion}"`,
     __DEV__: isBundlerESMBuild
       ? // preserve to be handled by bundlers
-        `(process.env.NODE_ENV !== 'production')`
+      `(process.env.NODE_ENV !== 'production')`
       : // hard coded dev/prod builds
-        !isProduction,
+      !isProduction,
     // this is only used during Vue's internal tests
     __TEST__: false,
     // If the build is expected to run directly in the browser (global / esm builds)
@@ -248,28 +248,28 @@ function createReplacePlugin(
     // for compiler-sfc browser build inlined deps
     ...(isBrowserESMBuild
       ? {
-          'process.env': '({})',
-          'process.platform': '""',
-          'process.stdout': 'null'
-        }
+        'process.env': '({})',
+        'process.platform': '""',
+        'process.stdout': 'null'
+      }
       : {}),
 
     // 2.x compat build
     __COMPAT__: isCompatBuild,
 
     // feature flags
-    __FEATURE_SUSPENSE__: true,
+    __FEATURE_SUSPENSE__: true,// 是否启用新特性
     __FEATURE_OPTIONS_API__: isBundlerESMBuild ? `__VUE_OPTIONS_API__` : true,
     __FEATURE_PROD_DEVTOOLS__: isBundlerESMBuild
       ? `__VUE_PROD_DEVTOOLS__`
       : false,
     ...(isProduction && isBrowserBuild
       ? {
-          'context.onError(': `/*#__PURE__*/ context.onError(`,
-          'emitError(': `/*#__PURE__*/ emitError(`,
-          'createCompilerError(': `/*#__PURE__*/ createCompilerError(`,
-          'createDOMCompilerError(': `/*#__PURE__*/ createDOMCompilerError(`
-        }
+        'context.onError(': `/*#__PURE__*/ context.onError(`,
+        'emitError(': `/*#__PURE__*/ emitError(`,
+        'createCompilerError(': `/*#__PURE__*/ createCompilerError(`,
+        'createDOMCompilerError(': `/*#__PURE__*/ createDOMCompilerError(`
+      }
       : {})
   }
   // allow inline overrides like

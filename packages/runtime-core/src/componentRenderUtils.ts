@@ -37,14 +37,14 @@ let accessedAttrs: boolean = false
 export function markAttrsAccessed() {
   accessedAttrs = true
 }
-// 生成vonde 的地方
+// 生成vonde 的地方，并且这是组件vnode 去生成vnode的地方
 export function renderComponentRoot(
   instance: ComponentInternalInstance
 ): VNode {
   // 取出实例中的相关内容
   const {
     type: Component,
-    vnode,
+    vnode,// 这是当前那个组件vnode
     proxy,
     withProxy,
     props,
@@ -169,6 +169,7 @@ export function renderComponentRoot(
         }
         // 克隆一个节点并且将 这也常规的attr 加入进去
         root = cloneVNode(root, fallthroughAttrs)
+        // dev 环境我们暂时不看
       } else if (__DEV__ && !accessedAttrs && root.type !== Comment) {
         const allAttrs = Object.keys(attrs)
         const eventAttrs: string[] = []
@@ -207,7 +208,7 @@ export function renderComponentRoot(
       }
     }
   }
-
+  // 兼容vue2的情况
   if (
     __COMPAT__ &&
     isCompatEnabled(DeprecationTypes.INSTANCE_ATTRS_CLASS_STYLE, instance) &&
@@ -238,6 +239,7 @@ export function renderComponentRoot(
         `The directives will not function as intended.`
       )
     }
+    // 指令给放进来，之所以这样处理，是由于可能在外部加了指令，并且在内部根节点也有指令，导致需要做一合并
     root.dirs = root.dirs ? root.dirs.concat(vnode.dirs) : vnode.dirs
   }
   // inherit transition data
@@ -248,12 +250,14 @@ export function renderComponentRoot(
         `that cannot be animated.`
       )
     }
+    // 动画相关
     root.transition = vnode.transition
   }
 
   if (__DEV__ && setRoot) {
     setRoot(root)
   } else {
+    // 将所有的合并后的结果，当前的root 是真的的渲染vnode ，而在instance中的vnode 其实就是个占位vnode
     result = root
   }
 

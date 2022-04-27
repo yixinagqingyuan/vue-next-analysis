@@ -83,7 +83,7 @@ function findInsertionIndex(id: number) {
 
   return start
 }
-
+//接收一个函数作为参数，会将函数按顺序保存到一个队列中，它是一个微任务
 export function queueJob(job: SchedulerJob) {
   // the dedupe search uses the startIndex argument of Array.includes()
   // by default the search index includes the current job that is being run
@@ -133,7 +133,7 @@ export function invalidateJob(job: SchedulerJob) {
     queue.splice(i, 1)
   }
 }
-
+//queueCb 和queueJob 的区别就是多了几个参数并且他还可以传数组，但是他们的本质都是异步任务
 function queueCb(
   cb: SchedulerJobs,
   activeQueue: SchedulerJob[] | null,
@@ -155,7 +155,7 @@ function queueCb(
   }
   queueFlush()
 }
-
+// queuePreFlushCb 和queuePostFlushCb 的却别是在维护dom更新前和更新后的区别
 export function queuePreFlushCb(cb: SchedulerJob) {
   queueCb(cb, activePreFlushCbs, pendingPreFlushCbs, preFlushIndex)
 }

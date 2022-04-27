@@ -19,6 +19,17 @@ export let currentScopeId: string | null = null
  * setCurrentRenderingInstance(prev)
  * ```
  */
+/**
+*注意：呈现调用可能是嵌套的。函数返回父级渲染
+*实例（如果存在），应在渲染完成后恢复：
+*
+*“js”
+*const prev=setCurrentRenderingInstance（i）
+* // ...提供
+*setCurrentRenderingInstance（上一个）
+* ```
+*/
+//设置当前渲染实例 
 export function setCurrentRenderingInstance(
   instance: ComponentInternalInstance | null
 ): ComponentInternalInstance | null {

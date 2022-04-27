@@ -20,3 +20,4 @@
 - [x] [位运算符在JS中的妙用](https://juejin.cn/post/6844903568906911752) 
 - [x] [Vue3 功能拆解② Scheduler 渲染机制](https://www.cheng92.com/vue/vue-teardown-2-sheduler/)
 - [x] [Vue3 中实例挂载（mount）过程](https://segmentfault.com/a/1190000025215985)
+- [x] [Vue3.0的插槽是如何實現的？](https://cdmana.com/2022/02/202202080525160588.html)

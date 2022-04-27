@@ -49,21 +49,23 @@ const isComment = (node: Node): node is Comment =>
 // it out creates a ton of unnecessary complexity.
 // Hydration also depends on some renderer internal logic which needs to be
 // passed in via arguments.
+// 这就是服务端方法，相当于path
 export function createHydrationFunctions(
   rendererInternals: RendererInternals<Node, Element>
 ) {
+  // 这是patch中的方法，然后在外层包装
   const {
     mt: mountComponent,
     p: patch,
     o: { patchProp, nextSibling, parentNode, remove, insert, createComment }
   } = rendererInternals
-
+  // 服务端的render
   const hydrate: RootHydrateFunction = (vnode, container) => {
     if (!container.hasChildNodes()) {
       __DEV__ &&
         warn(
           `Attempting to hydrate existing markup but container is empty. ` +
-            `Performing full mount instead.`
+          `Performing full mount instead.`
         )
       patch(null, vnode, container)
       flushPostFlushCbs()
@@ -77,7 +79,7 @@ export function createHydrationFunctions(
       console.error(`Hydration completed but contains mismatches.`)
     }
   }
-
+  // 服务端的patch
   const hydrateNode = (
     node: Node,
     vnode: VNode,
@@ -112,10 +114,10 @@ export function createHydrationFunctions(
             __DEV__ &&
               warn(
                 `Hydration text mismatch:` +
-                  `\n- Client: ${JSON.stringify((node as Text).data)}` +
-                  `\n- Server: ${JSON.stringify(vnode.children)}`
+                `\n- Client: ${JSON.stringify((node as Text).data)}` +
+                `\n- Server: ${JSON.stringify(vnode.children)}`
               )
-            ;(node as Text).data = vnode.children as string
+              ; (node as Text).data = vnode.children as string
           }
           nextNode = nextSibling(node)
         }
@@ -166,7 +168,7 @@ export function createHydrationFunctions(
           if (
             domType !== DOMNodeTypes.ELEMENT ||
             (vnode.type as string).toLowerCase() !==
-              (node as Element).tagName.toLowerCase()
+            (node as Element).tagName.toLowerCase()
           ) {
             nextNode = onMismatch()
           } else {
@@ -349,7 +351,7 @@ export function createHydrationFunctions(
           if (__DEV__ && !hasWarned) {
             warn(
               `Hydration children mismatch in <${vnode.type as string}>: ` +
-                `server rendered element contains more child nodes than client vdom.`
+              `server rendered element contains more child nodes than client vdom.`
             )
             hasWarned = true
           }
@@ -363,11 +365,10 @@ export function createHydrationFunctions(
           hasMismatch = true
           __DEV__ &&
             warn(
-              `Hydration text content mismatch in <${
-                vnode.type as string
+              `Hydration text content mismatch in <${vnode.type as string
               }>:\n` +
-                `- Client: ${el.textContent}\n` +
-                `- Server: ${vnode.children as string}`
+              `- Client: ${el.textContent}\n` +
+              `- Server: ${vnode.children as string}`
             )
           el.textContent = vnode.children as string
         }
@@ -409,7 +410,7 @@ export function createHydrationFunctions(
         if (__DEV__ && !hasWarned) {
           warn(
             `Hydration children mismatch in <${container.tagName.toLowerCase()}>: ` +
-              `server rendered element contains fewer child nodes than client vdom.`
+            `server rendered element contains fewer child nodes than client vdom.`
           )
           hasWarned = true
         }
@@ -484,8 +485,8 @@ export function createHydrationFunctions(
         node.nodeType === DOMNodeTypes.TEXT
           ? `(text)`
           : isComment(node) && node.data === '['
-          ? `(start of fragment)`
-          : ``
+            ? `(start of fragment)`
+            : ``
       )
     vnode.el = null
 
