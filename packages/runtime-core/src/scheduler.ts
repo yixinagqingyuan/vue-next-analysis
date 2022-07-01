@@ -134,6 +134,7 @@ export function invalidateJob(job: SchedulerJob) {
   }
 }
 //queueCb 和queueJob 的区别就是多了几个参数并且他还可以传数组，但是他们的本质都是异步任务
+// pendingQueue就是传入的在dom更新前以及跟新后的的队列数组
 function queueCb(
   cb: SchedulerJobs,
   activeQueue: SchedulerJob[] | null,
@@ -168,7 +169,7 @@ export function flushPreFlushCbs(
   seen?: CountMap,
   parentJob: SchedulerJob | null = null
 ) {
-  if (pendingPreFlushCbs.length) {
+  if (pendingPreFlushCbs.length) {  
     currentPreFlushParentJob = parentJob
     // 👉 去重
     activePreFlushCbs = [...new Set(pendingPreFlushCbs)]

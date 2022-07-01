@@ -1235,6 +1235,8 @@ function baseCreateRenderer(
         )
       }
     } else {
+      // 组件跟新，可能是响应式数据触发改变，可能是父组件传入的props 触发的改变
+      // 如果是父组件触发的改变
       updateComponent(n1, n2, optimized)
     }
   }
@@ -1356,13 +1358,17 @@ function baseCreateRenderer(
         instance.next = n2
         // in case the child component is also queued, remove it to avoid
         // double updating the same child component in the same flush.
+        //如果子组件也已排队，请将其移除以避免
+        //在同一次刷新中重复更新同一个子组件。
         invalidateJob(instance.update)
         // instance.update is the reactive effect.
         // 如果传入的props 有变化在执行更新
+        // 这个地方触发componentUpdateFn 的执行
         instance.update()
       }
     } else {
       // no update needed. just copy over properties
+      //不需要更新。只需复制属性即可
       n2.component = n1.component
       n2.el = n1.el
       instance.vnode = n2
@@ -1379,6 +1385,7 @@ function baseCreateRenderer(
   ) => {
     // 加个包装函数
     const componentUpdateFn = () => {
+      // 组件初始化的过程
       if (!instance.isMounted) {
         let vnodeHook: VNodeHook | null | undefined
         const { el, props } = initialVNode
@@ -1488,10 +1495,14 @@ function baseCreateRenderer(
           initialVNode.el = subTree.el
         }
         // mounted hook
+        // mounted 是在更新之后
+        // queuePostRenderEffect 他实际执行的是就是queuePostFlushCb
+        // 就会给他放在dom跟新之后的队列里
         if (m) {
           queuePostRenderEffect(m, parentSuspense)
         }
         // onVnodeMounted
+        // vnode的钩子
         if (
           !isAsyncWrapperVNode &&
           (vnodeHook = props && props.onVnodeMounted)
@@ -1502,6 +1513,7 @@ function baseCreateRenderer(
             parentSuspense
           )
         }
+        // 兼容vue2的的mounted 钩子
         if (
           __COMPAT__ &&
           isCompatEnabled(DeprecationTypes.INSTANCE_EVENT_HOOKS, instance)
@@ -1515,8 +1527,13 @@ function baseCreateRenderer(
         // activated hook for keep-alive roots.
         // #1742 activated hook must be accessed after first render
         // since the hook may be injected by a child keep-alive
+        //激活钩子，保持根系活力。
+        //#1742激活的钩子必须在第一次渲染后访问
+        //因为钩子可能会被一个孩子注射，所以保持生命
+        // keep-alive 钩子
         if (initialVNode.shapeFlag & ShapeFlags.COMPONENT_SHOULD_KEEP_ALIVE) {
           instance.a && queuePostRenderEffect(instance.a, parentSuspense)
+          // 兼容 vue2中的keep-alive 钩子
           if (
             __COMPAT__ &&
             isCompatEnabled(DeprecationTypes.INSTANCE_EVENT_HOOKS, instance)
@@ -1539,6 +1556,9 @@ function baseCreateRenderer(
         // updateComponent
         // This is triggered by mutation of component's own state (next: null)
         // OR parent calling processComponent (next: VNode)
+        // 这是组件更跟新的过程
+        // 经过测试在结构赋值的过程中next如果初始值没有的情况下，那么如果直接给next赋值，他也不会有 
+        //instance 在更新的时候被放在闭包里
         let { next, bu, u, parent, vnode } = instance
         let originNext = next
         let vnodeHook: VNodeHook | null | undefined
@@ -1547,11 +1567,17 @@ function baseCreateRenderer(
         }
 
         // Disallow component effect recursion during pre-lifecycle hooks.
+        //在生命周期前的钩子期间不允许组件效果递归。
         toggleRecurse(instance, false)
+        // 也就是想执行这一步必须在初始的时候instance.next有值
+       
         if (next) {
+          //也就是这一个if走的就是updatecompent的更新方式
           next.el = vnode.el
+          // 更新了props等内容
           updateComponentPreRender(instance, next, optimized)
         } else {
+           // 也就是走响应式的的更新一定是没有next的
           next = vnode
         }
 
@@ -1586,6 +1612,8 @@ function baseCreateRenderer(
           startMeasure(instance, `patch`)
         }
         // 这是更新的时候执行的patch
+        //这是在更新的时候可以用来触发组件更新，如果props变了，触发当前页面的dom 更新
+
         patch(
           prevTree,
           nextTree,
@@ -1605,6 +1633,9 @@ function baseCreateRenderer(
           // self-triggered update. In case of HOC, update parent component
           // vnode el. HOC is indicated by parent instance's subTree pointing
           // to child component's vnode
+          //自触发更新。如果是HOC，请更新父组件
+          //vnode el。HOC由父实例的子树指向表示
+          //到子组件的vnode
           updateHOCHostEl(instance, nextTree.el)
         }
         // updated hook
@@ -1686,6 +1717,7 @@ function baseCreateRenderer(
     //在渲染更新之前刷新它们。
     // props update may have triggered pre-flush watchers.
     // flush them before the render update.
+    // 也就是当前操作，为了防止  观察者中的异步任务被收集
     flushPreFlushCbs(undefined, instance.update)
     resetTracking()
   }

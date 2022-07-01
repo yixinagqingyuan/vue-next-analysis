@@ -154,6 +154,15 @@
   //       processComponent()
   //     }
   //   }
+
+  // 测试结构赋值
+  const instance = {
+    next: null
+  }
+  let { next } = instance
+  next = 111
+  console.log(instance)
+  console.log(next)
 </script>
 
 <style>

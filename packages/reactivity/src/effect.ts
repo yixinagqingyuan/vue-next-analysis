@@ -242,6 +242,9 @@ export function trackEffects(
   dep: Dep,// 小管家
   debuggerEventExtraInfo?: DebuggerEventExtraInfo
 ) {
+  // 当前shouldTrack 和全局的那个不一样，全局那个是为了防止依赖收集的
+  // 这个是为了在组件跟新之后重新依赖收集，为了避免浪费，使用位运算，来判断是否已经收集过了的
+  // 从而减少多次操作set的开销
   let shouldTrack = false
   if (effectTrackDepth <= maxMarkerBits) {
     //判断是否是重新收集 如果为true 就表示需要重新收集

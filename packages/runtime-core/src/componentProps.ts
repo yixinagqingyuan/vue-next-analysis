@@ -173,9 +173,10 @@ export function initProps(
   if (__DEV__) {
     validateProps(rawProps || {}, props, instance)
   }
-
+// 如果是个普通组件
   if (isStateful) {
     // stateful
+    // 如果不在ssr 的情况下将props做响应式
     instance.props = isSSR ? props : shallowReactive(props)
   } else {
     if (!instance.type.props) {

@@ -14,10 +14,10 @@ import {
 import { UnwrapRefSimple, Ref } from './ref'
 
 export const enum ReactiveFlags {
-  SKIP = '__v_skip',
-  IS_REACTIVE = '__v_isReactive',
-  IS_READONLY = '__v_isReadonly',
-  RAW = '__v_raw'
+  SKIP = '__v_skip', //无需响应的对象
+  IS_REACTIVE = '__v_isReactive', //响应式对象
+  IS_READONLY = '__v_isReadonly', //只读数据
+  RAW = '__v_raw'  //取原始对象
 }
 
 export interface Target {
@@ -33,11 +33,11 @@ export const readonlyMap = new WeakMap<Target, any>()
 export const shallowReadonlyMap = new WeakMap<Target, any>()
 
 const enum TargetType {
-  INVALID = 0,
-  COMMON = 1,
-  COLLECTION = 2
+  INVALID = 0,//无效的
+  COMMON = 1,//常见的
+  COLLECTION = 2//es6的这一些数据
 }
-
+// 判断他的代理对象的类型
 function targetTypeMap(rawType: string) {
   switch (rawType) {
     case 'Object':
@@ -54,6 +54,8 @@ function targetTypeMap(rawType: string) {
 }
 
 function getTargetType(value: Target) {
+  //Object.isExtensible()方法判断一个对象是否是可扩展的（是否可以在它上面添加新的属性）。
+  // 如果是个普通组件，或者是个冻结对象就不给他变成响应式
   return value[ReactiveFlags.SKIP] || !Object.isExtensible(value)
     ? TargetType.INVALID
     : targetTypeMap(toRawType(value))
@@ -193,6 +195,8 @@ function createReactiveObject(
   }
   // target is already a Proxy, return it.
   // exception: calling readonly() on a reactive object
+  //目标已经是代理，请返回它。
+  //异常：对反应对象调用readonly（）
   if (
     target[ReactiveFlags.RAW] &&
     !(isReadonly && target[ReactiveFlags.IS_REACTIVE])
@@ -205,13 +209,15 @@ function createReactiveObject(
     return existingProxy
   }
   // only a whitelist of value types can be observed.
+  //只能观察到值类型的白名单。
   const targetType = getTargetType(target)
+  // 如果不是响应式的或者是冻结的对象，直接不处理不做响应式
   if (targetType === TargetType.INVALID) {
     return target
   }
   const proxy = new Proxy(
     target,
-    targetType === TargetType.COLLECTION ? collectionHandlers : baseHandlers
+    targetType === TargetType.COLLECTION ? collectionHandlers : baseHandlers// 这个就是判断数据是不是es6的map啥的类型，一般情况下走普通类型
   )
   proxyMap.set(target, proxy)
   return proxy

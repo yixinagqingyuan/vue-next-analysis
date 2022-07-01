@@ -67,6 +67,13 @@ export const objectToString = Object.prototype.toString
 export const toTypeString = (value: unknown): string =>
   objectToString.call(value)
 
+//toRawType({}) //  Object 
+//toRawType([])  // Array    
+//toRawType(true) // Boolean
+//toRawType(undefined) // Undefined
+//toRawType(null) // Null
+//toRawType(function(){}) // Function
+//拿到他的数据了类型
 export const toRawType = (value: unknown): string => {
   // extract "RawType" from strings like "[object RawType]"
   return toTypeString(value).slice(8, -1)

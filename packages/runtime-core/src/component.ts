@@ -668,6 +668,7 @@ function setupStatefulComponent(
     // 拿到执行结果
     // callWithErrorHandling 方法是为了兼容处理,加入try catch 防止报错
     // steup 中的props等内容就是从这里传入去的
+    // 在执行的时候停止了依赖收集中间声明了ref等数据 启动响应式，但是没有触发get
     const setupResult = callWithErrorHandling(
       setup,
       instance,
